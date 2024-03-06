@@ -43,6 +43,11 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "github-actions@users.noreply.github.com"
+          for submodule in openai
+          do
+            git tag $submodule/${{ steps.version.outputs.v-version }}
+            git push origin -u $submodule/${{ steps.version.outputs.v-version }}
+          done
           git tag ${{ steps.version.outputs.v-version }}
           git push origin -u ${{ steps.version.outputs.v-version }}
 

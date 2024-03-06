@@ -25,33 +25,35 @@ import (
 // The client is configurable using
 //
 //	WithConfig(cfg aws.Config)
+//	WithModel(model Model)
+//	WithQuotaTokensInReply(quota int)
 func New(opts ...Option) (*Client, error) {
-	embeddings := &Client{}
+	client := &Client{}
 
 	defs := []Option{
 		WithModel(TITAN_TEXT_LITE_V1),
 	}
 
 	for _, opt := range defs {
-		opt(embeddings)
+		opt(client)
 	}
 
 	for _, opt := range opts {
-		opt(embeddings)
+		opt(client)
 	}
 
-	api, err := newService(embeddings)
+	api, err := newService(client)
 	if err != nil {
 		return nil, err
 	}
-	embeddings.api = api
+	client.api = api
 
-	return embeddings, nil
+	return client, nil
 }
 
-func newService(embeddings *Client) (*bedrockruntime.Client, error) {
-	if embeddings.api != nil {
-		return embeddings.api, nil
+func newService(client *Client) (*bedrockruntime.Client, error) {
+	if client.api != nil {
+		return client.api, nil
 	}
 
 	aws, err := config.LoadDefaultConfig(

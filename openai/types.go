@@ -85,9 +85,9 @@ func WithNetRC(host string) Option {
 }
 
 // Config tokens quota in reply
-func WithQuotaTokensInReply(limit int) Option {
+func WithQuotaTokensInReply(quota int) Option {
 	return func(c *Client) {
-		c.quotaTokensInReply = limit
+		c.quotaTokensInReply = quota
 	}
 }
 

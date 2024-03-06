@@ -43,7 +43,7 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "github-actions@users.noreply.github.com"
-          for submodule in openai
+          for submodule in openai bedrock
           do
             git tag $submodule/${{ steps.version.outputs.v-version }}
             git push origin -u $submodule/${{ steps.version.outputs.v-version }}

@@ -35,7 +35,7 @@ func New(opts ...Option) (*Client, error) {
 
 	defs := []Option{
 		WithModel(GPT_35_TURBO_0125),
-		WithNetRC(string(api.host)),
+		WithNetRC(string("api.openai.com")),
 	}
 
 	for _, opt := range defs {

@@ -84,13 +84,21 @@ func WithNetRC(host string) Option {
 	}
 }
 
+// Config tokens quota in reply
+func WithQuotaTokensInReply(quota int) Option {
+	return func(c *Client) {
+		c.quotaTokensInReply = quota
+	}
+}
+
 // OpenAI client
 type Client struct {
 	http.Stack
-	host           ø.Authority
-	secret         string
-	model          ModelID
-	consumedTokens int
+	host               ø.Authority
+	secret             string
+	model              ModelID
+	quotaTokensInReply int
+	consumedTokens     int
 }
 
 // See https://platform.openai.com/docs/api-reference/chat/create

@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/fogfish/gurl/v2 v2.8.2
 	github.com/jdxcode/netrc v1.0.0
-	github.com/kshard/chatter v0.0.1
+	github.com/kshard/chatter v0.0.2
 )
 
 require (

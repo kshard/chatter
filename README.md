@@ -11,12 +11,7 @@ The library is adapter over various popular Large Language Models tuned for text
 
 module | version | api
 --- | --- | ---
-[github.com/kshard/chatter/openai](./openai/) | 
-[![Version](https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*)](https://github.com/kshard/chatter/releases) |
-[![Documentation](https://pkg.go.dev/badge/github.com/kshard/chatter)](https://pkg.go.dev/github.com/kshard/chatter/openai)
-[github.com/kshard/chatter/openai](./openai/) |
-[![Version](https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*)](https://github.com/kshard/chatter/releases) |
-[![Documentation](https://pkg.go.dev/badge/github.com/kshard/chatter)](https://pkg.go.dev/github.com/kshard/chatter/openai)
+[github.com/kshard/chatter/openai](./openai/) | [![Version](https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*)](https://github.com/kshard/chatter/releases) | [![Documentation](https://pkg.go.dev/badge/github.com/kshard/chatter)](https://pkg.go.dev/github.com/kshard/chatter/openai)
 
 
 ## Inspiration

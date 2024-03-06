@@ -81,8 +81,9 @@ func (c *Client) Send(ctx context.Context, prompt *chatter.Prompt) (*chatter.Pro
 			ø.Authorization.Set(c.secret),
 			ø.ContentType.JSON,
 			ø.Send(modelInquery{
-				Model:    c.model,
-				Messages: seq,
+				Model:     c.model,
+				Messages:  seq,
+				MaxTokens: c.quotaTokensInReply,
 			}),
 
 			ƒ.Status.OK,

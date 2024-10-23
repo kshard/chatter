@@ -30,5 +30,5 @@ github.com/aws/smithy-go v1.20.1 h1:4SZlSlMr36UEqC7XOyRVb27XMeZubNcBNN+9IgEPIQw=
 github.com/aws/smithy-go v1.20.1/go.mod h1:krry+ya/rV9RDcV/Q16kpu6ypI4K2czasz0NC3qS14E=
 github.com/google/go-cmp v0.5.8 h1:e6P7q2lk1O+qJJb4BtCQXlK8vWEO8V1ZeuEdJNOqZyg=
 github.com/google/go-cmp v0.5.8/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
-github.com/kshard/chatter v0.0.2 h1:GRjtvrD6cypgMbF0taYACel3vIAg70LRJKb6IwhW5uU=
-github.com/kshard/chatter v0.0.2/go.mod h1:gzrRx2kTq7Bul/xD0lH4A2M13tIOFXsrIFBEufU+anY=
+github.com/kshard/chatter v0.0.4 h1:R5f8gHCXOL5a5G7BCyBj+Vwkl9wEWvisMimOVTOieEs=
+github.com/kshard/chatter v0.0.4/go.mod h1:gzrRx2kTq7Bul/xD0lH4A2M13tIOFXsrIFBEufU+anY=

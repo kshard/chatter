@@ -15,7 +15,8 @@ import (
 	"github.com/kshard/chatter"
 )
 
-// Amazon Titan Text model
+// Amazon Titan Text model family
+//
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-templates-and-examples.html
 type TitanText string
@@ -24,54 +25,25 @@ type TitanText string
 const (
 	TITAN_TEXT_LITE_V1    = TitanText("amazon.titan-text-lite-v1")
 	TITAN_TEXT_EXPRESS_V1 = TitanText("amazon.titan-text-express-v1")
+	TITAN_TEXT_PREMIER_V1 = TitanText("amazon.titan-text-premier-v1:0")
 )
 
 func (v TitanText) String() string { return string(v) }
 
-func (TitanText) encode(c *Client, prompt *chatter.Prompt) ([]byte, error) {
-	ctx := strings.Builder{}
-	if prompt.Stratum != "" {
-		ctx.WriteString(prompt.Stratum)
-		ctx.WriteRune(' ')
-	}
-	if prompt.Context != "" {
-		ctx.WriteString("The context for the input is \"")
-		ctx.WriteString(prompt.Context)
-		ctx.WriteString("\".")
-	}
+func (TitanText) Formatter() chatter.Formatter {
+	return chatter.NewFormatter("")
+}
 
-	req := strings.Builder{}
-
-	for i := 0; i < len(prompt.Messages)-1; i++ {
-		msg := prompt.Messages[i]
-
-		switch msg.Role {
-		case chatter.INQUIRY:
-			req.WriteString("User: ")
-			req.WriteString(msg.Content)
-			req.WriteRune('\n')
-		case chatter.CHATTER:
-			req.WriteString("Bot: ")
-			req.WriteString(msg.Content)
-			req.WriteRune('\n')
-		}
-	}
-
-	tail := prompt.Messages[len(prompt.Messages)-1]
-	if tail.Role == chatter.INQUIRY {
-		req.WriteString("User: ")
-		if ctx.Len() > 0 {
-			req.WriteString(ctx.String())
-			req.WriteRune(' ')
-		}
-		req.WriteString(tail.Content)
-		req.WriteRune('\n')
-	}
+func (TitanText) Encode(c *Client, prompt *chatter.Prompt, opts *chatter.Options) ([]byte, error) {
+	sb := strings.Builder{}
+	c.formatter.ToString(&sb, prompt)
 
 	inquery := titanInquery{
-		Prompt: req.String(),
+		Prompt: sb.String(),
 		Config: titanInqueryConfig{
-			MaxTokens: c.quotaTokensInReply,
+			Temperature: opts.Temperature,
+			TopP:        opts.TopP,
+			MaxTokens:   c.quotaTokensInReply,
 		},
 	}
 
@@ -83,7 +55,7 @@ func (TitanText) encode(c *Client, prompt *chatter.Prompt) ([]byte, error) {
 	return body, nil
 }
 
-func (TitanText) decode(c *Client, data []byte) (string, error) {
+func (TitanText) Decode(c *Client, data []byte) (string, error) {
 	var reply titanChatter
 	if err := json.Unmarshal(data, &reply); err != nil {
 		return "", err

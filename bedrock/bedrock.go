@@ -10,6 +10,7 @@ package bedrock
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -17,48 +18,45 @@ import (
 	"github.com/kshard/chatter"
 )
 
-// Creates AWS BedRock embeddings client.
+// AWS Bedrock client
+type Client struct {
+	api                *bedrockruntime.Client
+	region             string
+	model              Model
+	formatter          chatter.Formatter
+	quotaTokensInReply int
+	consumedTokens     int
+}
+
+// Create client to AWS BedRock.
 //
-// By default `us-east-1` region is used, supply custom `aws.Config`
-// to alter behavior.
-//
-// The client is configurable using
-//
-//	WithConfig(cfg aws.Config)
-//	WithModel(model Model)
-//	WithQuotaTokensInReply(quota int)
+// By default `us-east-1` region is used, use config options to alter behavior.
 func New(opts ...Option) (*Client, error) {
-	client := &Client{}
-
-	defs := []Option{
-		WithModel(TITAN_TEXT_LITE_V1),
-	}
-
-	for _, opt := range defs {
-		opt(client)
-	}
+	client := &Client{region: "us-east-1"}
 
 	for _, opt := range opts {
 		opt(client)
 	}
 
-	api, err := newService(client)
-	if err != nil {
-		return nil, err
+	if client.api == nil {
+		api, err := newService(client.region)
+		if err != nil {
+			return nil, err
+		}
+		client.api = api
 	}
-	client.api = api
+
+	if client.model == nil {
+		return nil, fmt.Errorf("undefined model")
+	}
 
 	return client, nil
 }
 
-func newService(client *Client) (*bedrockruntime.Client, error) {
-	if client.api != nil {
-		return client.api, nil
-	}
-
+func newService(region string) (*bedrockruntime.Client, error) {
 	aws, err := config.LoadDefaultConfig(
 		context.Background(),
-		config.WithRegion("us-east-1"),
+		config.WithRegion(region),
 	)
 	if err != nil {
 		return nil, err
@@ -70,11 +68,16 @@ func newService(client *Client) (*bedrockruntime.Client, error) {
 // Number of tokens consumed within the session
 func (c *Client) ConsumedTokens() int { return c.consumedTokens }
 
-// Calculates embedding vector
-func (c *Client) Send(ctx context.Context, prompt *chatter.Prompt) (*chatter.Prompt, error) {
-	body, err := c.model.encode(c, prompt)
+// Prompt the model
+func (c *Client) Prompt(ctx context.Context, prompt *chatter.Prompt, opts ...func(*chatter.Options)) (string, error) {
+	opt := chatter.Options{Temperature: chatter.DefaultTemperature, TopP: chatter.DefaultTopP}
+	for _, o := range opts {
+		o(&opt)
+	}
+
+	body, err := c.model.Encode(c, prompt, &opt)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	req := &bedrockruntime.InvokeModelInput{
@@ -85,13 +88,13 @@ func (c *Client) Send(ctx context.Context, prompt *chatter.Prompt) (*chatter.Pro
 
 	result, err := c.api.InvokeModel(ctx, req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	reply, err := c.model.decode(c, result.Body)
+	reply, err := c.model.Decode(c, result.Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return prompt.Chatter(reply), nil
+	return reply, nil
 }

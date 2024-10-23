@@ -15,6 +15,7 @@ import (
 	"github.com/fogfish/gurl/v2/http"
 	ø "github.com/fogfish/gurl/v2/http/send"
 	"github.com/jdxcode/netrc"
+	"github.com/kshard/chatter"
 )
 
 // Config option for the client
@@ -27,12 +28,15 @@ const (
 	GPT_35_TURBO_INSTRUCT = ModelID("gpt-3.5-turbo-instruct")
 	GPT_4                 = ModelID("gpt-4")
 	GPT_4_32K             = ModelID("gpt-4-32k")
+	GPT_4o                = ModelID("gpt-4o")
+	GPT_4o_MINI           = ModelID("gpt-4o-mini")
 )
 
 // Config the model
 func WithModel(id ModelID) Option {
 	return func(c *Client) {
 		c.model = id
+		c.formatter = chatter.NewFormatter("")
 	}
 }
 
@@ -91,12 +95,20 @@ func WithQuotaTokensInReply(quota int) Option {
 	}
 }
 
+// Config Formatter
+func WithFormatter(formatter chatter.Formatter) Option {
+	return func(c *Client) {
+		c.formatter = formatter
+	}
+}
+
 // OpenAI client
 type Client struct {
 	http.Stack
 	host               ø.Authority
 	secret             string
 	model              ModelID
+	formatter          chatter.Formatter
 	quotaTokensInReply int
 	consumedTokens     int
 }

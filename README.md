@@ -1,18 +1,67 @@
-# chatter
+<p align="center">
+  <h3 align="center">chatter</h3>
+  <p align="center"><strong>adapter over LLMs interface</strong></p>
+
+  <p align="center">
+    <!-- Build Status  -->
+    <a href="https://github.com/kshard/chatter/actions/">
+      <img src="https://github.com/kshard/chatter/workflows/build/badge.svg" />
+    </a>
+    <!-- GitHub -->
+    <a href="https://github.com/kshard/chatter">
+      <img src="https://img.shields.io/github/last-commit/kshard/chatter.svg" />
+    </a>
+    <!-- Coverage -->
+    <a href="https://coveralls.io/github/kshard/chatter?branch=main">
+      <img src="https://coveralls.io/repos/github/kshard/chatter/badge.svg?branch=main" />
+    </a>
+    <!-- Go Card -->
+    <a href="https://goreportcard.com/report/github.com/kshard/chatter">
+      <img src="https://goreportcard.com/badge/github.com/kshard/chatter" />
+    </a>
+  </p>
+
+  <table align="center">
+    <thead><tr><th>sub-module</th><th>doc</th><th>about</th></tr></thead>
+    <tbody>
+    <!-- Module chatter types -->
+    <tr><td><a href=".">
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=v*"/>
+    </a></td>
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter">
+      <img src="https://img.shields.io/badge/doc-chatter-007d9c?logo=go&logoColor=white&style=platic" />
+    </a></td>
+    <td>
+      chatter types
+    </td></tr>
+    <!-- Module bedrock -->
+    <tr><td><a href=".">
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=bedrock/*"/>
+    </a></td>
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/bedrock">
+      <img src="https://img.shields.io/badge/doc-bedrock-007d9c?logo=go&logoColor=white&style=platic" />
+    </a></td>
+    <td>
+      AWS Bedrock LLMs
+    </td></tr>
+		<!-- Module bedrock -->
+    <tr><td><a href=".">
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*"/>
+    </a></td>
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/openai">
+      <img src="https://img.shields.io/badge/doc-openai-007d9c?logo=go&logoColor=white&style=platic" />
+    </a></td>
+    <td>
+      OpenAI LLMs
+    </td></tr>
+		</tbody>
+	</table>
+</p>
+
+---
+
 
 The library is adapter over various popular Large Language Models (LLMs) tuned for text generation: AWS BedRock, OpenAI.
-
-[![Version](https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=v*)](https://github.com/kshard/chatter/releases)
-[![Documentation](https://pkg.go.dev/badge/github.com/kshard/chatter)](https://pkg.go.dev/github.com/kshard/chatter)
-[![Build Status](https://github.com/kshard/chatter/workflows/build/badge.svg)](https://github.com/kshard/chatter/actions/)
-[![Git Hub](https://img.shields.io/github/last-commit/kshard/chatter.svg)](https://github.com/kshard/chatter)
-[![Coverage Status](https://coveralls.io/repos/github/kshard/chatter/badge.svg?branch=main)](https://coveralls.io/github/kshard/chatter?branch=main)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kshard/chatter)](https://goreportcard.com/report/github.com/kshard/chatter)
-
-| module                                          | version                                                                                                                                     | api                                                                                                                          |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| [github.com/kshard/chatter/openai](./openai/)   | [![Version](https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*)](https://github.com/kshard/chatter/releases)  | [![Documentation](https://pkg.go.dev/badge/github.com/kshard/chatter)](https://pkg.go.dev/github.com/kshard/chatter/openai)  |
-| [github.com/kshard/chatter/bedrock](./bedrock/) | [![Version](https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=bedrock/*)](https://github.com/kshard/chatter/releases) | [![Documentation](https://pkg.go.dev/badge/github.com/kshard/chatter)](https://pkg.go.dev/github.com/kshard/chatter/bedrock) |
 
 
 ## Inspiration

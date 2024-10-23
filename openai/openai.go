@@ -11,6 +11,7 @@ package openai
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/kshard/chatter"
 
@@ -57,21 +58,12 @@ func New(opts ...Option) (*Client, error) {
 func (c *Client) ConsumedTokens() int { return c.consumedTokens }
 
 // Send prompt
-func (c *Client) Send(ctx context.Context, prompt *chatter.Prompt) (*chatter.Prompt, error) {
-	seq := make([]message, 0)
-	if prompt.Stratum != "" {
-		seq = append(seq, message{Role: "system", Content: prompt.Stratum})
-	}
-	if prompt.Context != "" {
-		seq = append(seq, message{Role: "system", Content: "Context: " + prompt.Context})
-	}
-	for _, m := range prompt.Messages {
-		switch m.Role {
-		case chatter.INQUIRY:
-			seq = append(seq, message{Role: "user", Content: m.Content})
-		case chatter.CHATTER:
-			seq = append(seq, message{Role: "assistant", Content: m.Content})
-		}
+func (c *Client) Prompt(ctx context.Context, prompt *chatter.Prompt, opts ...func(*chatter.Options)) (string, error) {
+	var sb strings.Builder
+	c.formatter.ToString(&sb, prompt)
+
+	seq := []message{
+		{Role: "user", Content: sb.String()},
 	}
 
 	bag, err := http.IO[modelChatter](c.WithContext(ctx),
@@ -91,13 +83,13 @@ func (c *Client) Send(ctx context.Context, prompt *chatter.Prompt) (*chatter.Pro
 		),
 	)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	c.consumedTokens += bag.Usage.UsedTokens
 	if len(bag.Choices) == 0 {
-		return nil, errors.New("empty response")
+		return "", errors.New("empty response")
 	}
 
-	return prompt.Chatter(bag.Choices[0].Message.Content), nil
+	return bag.Choices[0].Message.Content, nil
 }

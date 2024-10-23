@@ -24,10 +24,25 @@ func WithConfig(cfg aws.Config) Option {
 	}
 }
 
-// Config bedrock model
+// Config AWS region
+func WithRegion(region string) Option {
+	return func(c *Client) {
+		c.region = region
+	}
+}
+
+// Config Bedrock model
 func WithModel(model Model) Option {
 	return func(c *Client) {
 		c.model = model
+		c.formatter = model.Formatter()
+	}
+}
+
+// Config Formatter
+func WithFormatter(formatter chatter.Formatter) Option {
+	return func(c *Client) {
+		c.formatter = formatter
 	}
 }
 
@@ -38,16 +53,9 @@ func WithQuotaTokensInReply(quota int) Option {
 	}
 }
 
-// Bedrock client
-type Client struct {
-	api                *bedrockruntime.Client
-	model              Model
-	quotaTokensInReply int
-	consumedTokens     int
-}
-
 type Model interface {
 	String() string
-	encode(*Client, *chatter.Prompt) ([]byte, error)
-	decode(*Client, []byte) (string, error)
+	Formatter() chatter.Formatter
+	Encode(*Client, *chatter.Prompt, *chatter.Options) ([]byte, error)
+	Decode(*Client, []byte) (string, error)
 }

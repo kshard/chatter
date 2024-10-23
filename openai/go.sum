@@ -11,8 +11,8 @@ github.com/jdxcode/netrc v1.0.0/go.mod h1:Zi/ZFkEqFHTm7qkjyNJjaWH4LQA9LQhGJyF0lT
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/kshard/chatter v0.0.2 h1:GRjtvrD6cypgMbF0taYACel3vIAg70LRJKb6IwhW5uU=
-github.com/kshard/chatter v0.0.2/go.mod h1:gzrRx2kTq7Bul/xD0lH4A2M13tIOFXsrIFBEufU+anY=
+github.com/kshard/chatter v0.0.4 h1:R5f8gHCXOL5a5G7BCyBj+Vwkl9wEWvisMimOVTOieEs=
+github.com/kshard/chatter v0.0.4/go.mod h1:gzrRx2kTq7Bul/xD0lH4A2M13tIOFXsrIFBEufU+anY=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 golang.org/x/net v0.17.0 h1:pVaXccu2ozPjCXewfr1S7xza/zcXTity9cCdXQYSjIM=

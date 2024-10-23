@@ -9,7 +9,7 @@ replace github.com/kshard/chatter/openai => ../openai
 replace github.com/kshard/chatter/bedrock => ../bedrock
 
 require (
-	github.com/kshard/chatter v0.0.2
+	github.com/kshard/chatter v0.0.4
 	github.com/kshard/chatter/bedrock v0.0.0-00010101000000-000000000000
 )
 

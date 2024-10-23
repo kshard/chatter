@@ -15,7 +15,7 @@ import (
 	"github.com/kshard/chatter"
 )
 
-// Meta Llama 2 Chat model
+// Meta Llama2 model family
 //
 // See
 // * https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-meta.html
@@ -30,48 +30,19 @@ const (
 
 func (v Llama2) String() string { return string(v) }
 
-func (Llama2) encode(c *Client, prompt *chatter.Prompt) ([]byte, error) {
-	ctx := strings.Builder{}
-	if prompt.Stratum != "" {
-		ctx.WriteString(prompt.Stratum)
-		ctx.WriteRune('\n')
-	}
-	if prompt.Context != "" {
-		ctx.WriteString("Context: ")
-		ctx.WriteString(prompt.Context)
-		ctx.WriteRune('\n')
-	}
+func (Llama2) Formatter() chatter.Formatter {
+	return llama2Prompter{chatter.NewFormatter("")}
+}
 
-	req := strings.Builder{}
-
-	for i := 0; i < len(prompt.Messages)-1; i++ {
-		msg := prompt.Messages[i]
-
-		switch msg.Role {
-		case chatter.INQUIRY:
-			req.WriteString("[INST]\n")
-			req.WriteString(msg.Content)
-			req.WriteString("\n[/INST]\n")
-		case chatter.CHATTER:
-			req.WriteString(msg.Content)
-			req.WriteRune('\n')
-		}
-	}
-
-	tail := prompt.Messages[len(prompt.Messages)-1]
-	if tail.Role == chatter.INQUIRY {
-		req.WriteString("[INST]\n")
-		if ctx.Len() > 0 {
-			req.WriteString(ctx.String())
-			req.WriteRune('\n')
-		}
-		req.WriteString(tail.Content)
-		req.WriteString("\n[/INST]\n")
-	}
+func (Llama2) Encode(c *Client, prompt *chatter.Prompt, opts *chatter.Options) ([]byte, error) {
+	sb := strings.Builder{}
+	c.formatter.ToString(&sb, prompt)
 
 	inquery := llamaInquery{
-		Prompt:    req.String(),
-		MaxTokens: c.quotaTokensInReply,
+		Prompt:      sb.String(),
+		Temperature: opts.Temperature,
+		TopP:        opts.TopP,
+		MaxTokens:   c.quotaTokensInReply,
 	}
 
 	body, err := json.Marshal(inquery)
@@ -82,7 +53,7 @@ func (Llama2) encode(c *Client, prompt *chatter.Prompt) ([]byte, error) {
 	return body, nil
 }
 
-func (Llama2) decode(c *Client, data []byte) (string, error) {
+func (Llama2) Decode(c *Client, data []byte) (string, error) {
 	var reply llamaChatter
 	if err := json.Unmarshal(data, &reply); err != nil {
 		return "", err
@@ -106,4 +77,12 @@ type llamaChatter struct {
 	UsedPromptTokens int    `json:"prompt_token_count"`
 	UsedTextTokens   int    `json:"generation_token_count"`
 	StopReason       string `json:"stop_reason"`
+}
+
+type llama2Prompter struct{ chatter.Formatter }
+
+func (p llama2Prompter) ToString(sb *strings.Builder, prompt *chatter.Prompt) {
+	sb.WriteString("\n[INST]\n")
+	p.Formatter.ToString(sb, prompt)
+	sb.WriteString("\n[/INST]\n")
 }

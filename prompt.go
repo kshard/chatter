@@ -8,85 +8,240 @@
 
 package chatter
 
+import (
+	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+)
+
 // Prompt data type consisting of context and bag of exchange messages.
 type Prompt struct {
 	// Ground level constrain of the model behavior.
 	// The latin meaning "something that has been laid down".
 	// Think about it as a cornerstone of the model behavior.
+	// "Act as <role>" ...
+	Role string `json:"stratum,omitempty"`
+
+	// The task is a summary of what you want the prompt to do.
+	Task string `json:"task,omitempty"`
+
+	// Instructions informs model how to complete the task.
+	// Examples of how it could go about tasks.
+	Instructions *Remark `json:"instructions,omitempty"`
+
+	// Requirements is all about giving as much information as possible to ensure
+	// your response does not use any incorrect assumptions.
+	Requirements *Remark `json:"requirements,omitempty"`
+
+	// Input data required to complete the task.
+	Input *Remark `json:"input,omitempty"`
+
+	// Additional information required to complete the task.
+	Context *Remark `json:"context,omitempty"`
+}
+
+// Remark is the sequence to statements annotated with note for the model.
+type Remark struct {
+	Note string   `json:"note,omitempty"`
+	Text []string `json:"text,omitempty"`
+}
+
+// Setting a specific role for a given prompt increases the likelihood of
+// more accurate information, when done appropriately.
+func (prompt *Prompt) WithRole(role string) *Prompt {
+	prompt.Role = strings.TrimSuffix(strings.TrimSpace(role), ".")
+	return prompt
+}
+
+// The task is a summary of what you want the prompt to do.
+func (prompt *Prompt) WithTask(task string, args ...any) *Prompt {
+	prompt.Task = fmt.Sprintf(
+		strings.TrimSuffix(strings.TrimSpace(task), "."),
+		args...,
+	)
+	return prompt
+}
+
+// Instructions informs model how to complete the task.
+// Examples of how it could go about tasks.
+func (prompt *Prompt) WithInstruction(ins string, args ...any) *Prompt {
+	if prompt.Instructions == nil {
+		prompt.Instructions = &Remark{Note: "", Text: []string{}}
+	}
+
+	prompt.Instructions.Text = append(
+		prompt.Instructions.Text,
+		fmt.Sprintf(strings.TrimSpace(ins), args...),
+	)
+	return prompt
+}
+
+// Requirements is all about giving as much information as possible to ensure
+// your response does not use any incorrect assumptions.
+func (prompt *Prompt) WithRequirements(note string) *Prompt {
+	if prompt.Requirements == nil {
+		prompt.Requirements = &Remark{Note: "", Text: []string{}}
+	}
+
+	prompt.Requirements.Note = strings.TrimSpace(note)
+	return prompt
+}
+
+// Requirements is all about giving as much information as possible to ensure
+// your response does not use any incorrect assumptions.
+func (prompt *Prompt) WithRequirement(req string, args ...any) *Prompt {
+	if prompt.Requirements == nil {
+		prompt.Requirements = &Remark{Note: "", Text: []string{}}
+	}
+
+	prompt.Requirements.Text = append(prompt.Requirements.Text,
+		fmt.Sprintf(strings.TrimSpace(req), args...),
+	)
+	return prompt
+}
+
+// Input data required to complete the task.
+func (prompt *Prompt) WithInput(about string, input []string) *Prompt {
+	prompt.Input = &Remark{
+		Note: strings.TrimSuffix(strings.TrimSpace(about), ":"),
+		Text: input,
+	}
+
+	return prompt
+}
+
+// Additional information required to complete the task.
+func (prompt *Prompt) WithContext(about string, context []string) *Prompt {
+	prompt.Context = &Remark{
+		Note: strings.TrimSuffix(strings.TrimSpace(about), ":"),
+		Text: context,
+	}
+
+	return prompt
+}
+
+// Prompt to string formatter
+type Formatter interface {
+	ToString(*strings.Builder, *Prompt)
+}
+
+// Generic prompt formatter. Build prompt following the best approach
+//
+//	{role}. {task}. {instructions}.
+//	1. {requirements}
+//	2. {requirements}
+//	3. ...
+//
+//	{about input}:
+//	- {input}
+//	- {input}
+//	- ...
+//
+//	{about context}
+//	- {context}
+//	- {context}
+//	- ...
+func NewFormatter(role string) Formatter {
+	return defaultFormatter{role: strings.TrimSpace(role)}
+}
+
+type defaultFormatter struct {
+	// Ground level constrain of the model behavior.
+	// The latin meaning "something that has been laid down".
+	// Think about it as a cornerstone of the model behavior.
 	// "Act as <stratum>" ...
-	Stratum string `json:"stratum,omitempty"`
-
-	// Desired context of prompt and reply.
-	Context string `json:"context,omitempty"`
-
-	// Sequence of inquiries and replies
-	Messages []Message `json:"messages,omitempty"`
+	role string
 }
 
-// Message of the prompt
-type Message struct {
-	Role    Role   `json:"role,omitempty"`
-	Content string `json:"content,omitempty"`
+func (p defaultFormatter) ToString(sb *strings.Builder, prompt *Prompt) {
+	if len(prompt.Role) == 0 {
+		prompt.WithRole(p.role)
+	}
+
+	if len(prompt.Role) > 0 {
+		sb.WriteString(prompt.Role)
+		sb.WriteString(". ")
+	}
+
+	if len(prompt.Task) > 0 {
+		sb.WriteString(asSingleLine(prompt.Task))
+		sb.WriteString(". ")
+	}
+
+	p.pp(sb, prompt.Instructions)
+	p.ol(sb, prompt.Requirements)
+	p.ul(sb, prompt.Input)
+	p.ul(sb, prompt.Context)
 }
 
-type Role int
+// write remark as sequence of sentences
+func (p defaultFormatter) pp(sb *strings.Builder, remark *Remark) {
+	if remark == nil || len(remark.Text) == 0 {
+		return
+	}
 
-const (
-	INQUIRY Role = iota + 1
-	CHATTER
-)
+	if len(remark.Text) == 1 {
+		sb.WriteString(strings.TrimSuffix(asSingleLine(remark.Text[0]), "."))
+		sb.WriteString(". ")
+		return
+	}
 
-// Prompt setter interface
-type Setter func(prompt *Prompt)
-
-// Set up stratum for newly created prompt
-func WithStratum(content string) Setter {
-	return func(prompt *Prompt) {
-		prompt.Stratum = content
+	for _, t := range remark.Text {
+		sb.WriteString(strings.TrimSuffix(asSingleLine(t), "."))
+		sb.WriteString(". ")
 	}
 }
 
-// Set up context for newly created prompt
-func WithContext(content string) Setter {
-	return func(prompt *Prompt) {
-		prompt.Context = content
+// write remark as unordered list
+func (p defaultFormatter) ul(sb *strings.Builder, remark *Remark) {
+	if remark == nil || len(remark.Text) == 0 {
+		return
+	}
+
+	if len(remark.Text) == 1 {
+		sb.WriteString(asSingleLine(remark.Text[0]))
+		sb.WriteString("\n")
+		return
+	}
+
+	sb.WriteString("\n")
+	sb.WriteString(asSingleLine(remark.Note))
+	sb.WriteString("\n")
+
+	for _, t := range remark.Text {
+		sb.WriteString("* ")
+		sb.WriteString(asSingleLine(t))
+		sb.WriteString("\n")
 	}
 }
 
-// Create new prompt object
-func NewPrompt(opts ...Setter) *Prompt {
-	prompt := &Prompt{}
-	for _, opt := range opts {
-		opt(prompt)
-	}
-	return prompt
-}
-
-// Inject inquiry message into prompts
-func (prompt *Prompt) Inquiry(content string) *Prompt {
-	prompt.Messages = append(prompt.Messages,
-		Message{Role: INQUIRY, Content: content},
-	)
-	return prompt
-}
-
-// Inject chatter/reply/generated message into prompts
-func (prompt *Prompt) Chatter(content string) *Prompt {
-	prompt.Messages = append(prompt.Messages,
-		Message{Role: CHATTER, Content: content},
-	)
-	return prompt
-}
-
-// Retrieve the latest reply
-func (prompt *Prompt) Reply() string {
-	for i := len(prompt.Messages) - 1; i >= 0; i-- {
-		msg := prompt.Messages[i]
-
-		if msg.Role == CHATTER {
-			return msg.Content
-		}
+// write remark as ordered list
+func (p defaultFormatter) ol(sb *strings.Builder, remark *Remark) {
+	if remark == nil || len(remark.Text) == 0 {
+		return
 	}
 
-	return ""
+	if len(remark.Text) == 1 {
+		sb.WriteString(asSingleLine(remark.Text[0]))
+		sb.WriteString("\n")
+		return
+	}
+
+	sb.WriteString("\n")
+	sb.WriteString(asSingleLine(remark.Note))
+	sb.WriteString("\n")
+
+	for i, t := range remark.Text {
+		sb.WriteString(strconv.Itoa(i + 1))
+		sb.WriteString(". ")
+		sb.WriteString(asSingleLine(t))
+		sb.WriteString("\n")
+	}
+}
+
+var reSingleLine = regexp.MustCompile("[\r\n\t ]+")
+
+func asSingleLine(s string) string {
+	return reSingleLine.ReplaceAllString(s, " ")
 }

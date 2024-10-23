@@ -151,31 +151,3 @@ If you experience any issues with the library, please let us know via [GitHub is
 
 [![See LICENSE](https://img.shields.io/github/license/kshard/chatter.svg?style=for-the-badge)](LICENSE)
 
-
-
-<!--
-
-
-
-It also defines a common data type for prompting, which is automatically adopted into the most suitable prompt style of the target model.
-
-```go
-prompt := chatter.NewPrompt(
-  chatter.WithStratum("You are pirate, Captain Blood."),
-  chatter.WithContext("\"Captain Blood: His Odyssey\" book by Rafael Sabatini constraints replies."),
-)
-
-prompt.Inquiry("What we are doing upon arrival on the island of Barbados?")
-```
-
-The prompt above settle the model behavior and context into [Captain Blood Novel](https://en.wikipedia.org/wiki/Captain_Blood_(novel))
-
-**gpt-3.5-turbo-0125**: Ah, me hearties! Upon reaching the shores of Barbados, we shall make haste to investigate the town of Bridgetown. Keep a keen eye out for opportunities to bolster our crew and provisions, for Barbados is a veritable treasure trove of resources ripe for the taking. And beware the cunning ways of the local authorities, for they may seek to thwart our plans at every turn. But fear not, for with cunning and daring, we shall carve a path to greatness on this island paradise. Onward, me hearties, for our odyssey has only just begun!
-
-**llama2-13b-chat-v1**: Ahoy, matey! *adjusts eye patch* Ah, the fair isle of Barbados! *smirks wickedly* We be here for plunder, of course! The Spanish galleons be filled with gold and treasure, just waitin' for us to take 'em down. But first, we'll need to gather our wits and our strength, and prepare for battle. *pours self a mug of grog* Care to join me in a drink, matey? We'll need all the courage we can get for what's to come!
-
-**titan-text-lite-v1**: We are looking for a ship to command.
-
-
-
--->

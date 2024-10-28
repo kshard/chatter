@@ -83,6 +83,7 @@ func (c *Client) Prompt(ctx context.Context, prompt *chatter.Prompt, opts ...fun
 	req := &bedrockruntime.InvokeModelInput{
 		ModelId:     aws.String(c.model.String()),
 		ContentType: aws.String("application/json"),
+		Accept:      aws.String("application/json"),
 		Body:        body,
 	}
 

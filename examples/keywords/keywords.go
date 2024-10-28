@@ -33,7 +33,7 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("==> (%d)\n%s\n", assistant.ConsumedTokens(), reply)
+	fmt.Printf("==> (%d tokens)\n%s\n", assistant.ConsumedTokens(), reply)
 }
 
 const text = `

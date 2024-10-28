@@ -15,11 +15,18 @@ import (
 // * https://www.llama.com/docs/model-cards-and-prompt-formats/meta-llama-3/
 type Llama3 string
 
+// See model id
+// https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html#model-ids-arns
 const (
-	LLAMA3_0_8B_INSTRUCT  = Llama3("meta.llama3-8b-instruct-v1:0")
-	LLAMA3_0_70B_INSTRUCT = Llama3("meta.llama3-70b-instruct-v1:0")
-	LLAMA3_2_1B_INSTRUCT  = Llama3("meta.llama3-2-1b-instruct-v1:0")
-	LLAMA3_2_3B_INSTRUCT  = Llama3("meta.llama3-2-3b-instruct-v1:0")
+	LLAMA3_0_8B_INSTRUCT   = Llama3("meta.llama3-8b-instruct-v1:0")
+	LLAMA3_0_70B_INSTRUCT  = Llama3("meta.llama3-70b-instruct-v1:0")
+	LLAMA3_1_8B_INSTRUCT   = Llama3("meta.llama3-1-8b-instruct-v1:0")
+	LLAMA3_1_70B_INSTRUCT  = Llama3("meta.llama3-1-70b-instruct-v1:0")
+	LLAMA3_1_405B_INSTRUCT = Llama3("meta.llama3-1-405b-instruct-v1:0")
+	LLAMA3_2_1B_INSTRUCT   = Llama3("meta.llama3-2-1b-instruct-v1:0")
+	LLAMA3_2_3B_INSTRUCT   = Llama3("meta.llama3-2-3b-instruct-v1:0")
+	LLAMA3_2_11B_INSTRUCT  = Llama3("meta.llama3-2-11b-instruct-v1:0")
+	LLAMA3_2_90B_INSTRUCT  = Llama3("meta.llama3-2-90b-instruct-v1:0")
 )
 
 func (v Llama3) String() string { return string(v) }

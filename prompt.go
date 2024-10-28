@@ -34,6 +34,9 @@ type Prompt struct {
 	// your response does not use any incorrect assumptions.
 	Requirements *Remark `json:"requirements,omitempty"`
 
+	// Examples how to complete the task
+	Examples []Example `json:"examples,omitempty"`
+
 	// Input data required to complete the task.
 	Input *Remark `json:"input,omitempty"`
 
@@ -45,6 +48,12 @@ type Prompt struct {
 type Remark struct {
 	Note string   `json:"note,omitempty"`
 	Text []string `json:"text,omitempty"`
+}
+
+// Example is input output pair
+type Example struct {
+	Input  string `json:"input,omitempty"`
+	Output string `json:"output,omitempty"`
 }
 
 // Setting a specific role for a given prompt increases the likelihood of
@@ -101,6 +110,16 @@ func (prompt *Prompt) WithRequirement(req string, args ...any) *Prompt {
 	return prompt
 }
 
+// Define the example of expected task
+func (prompt *Prompt) WithExample(input, output string) *Prompt {
+	if prompt.Examples == nil {
+		prompt.Examples = []Example{}
+	}
+
+	prompt.Examples = append(prompt.Examples, Example{Input: input, Output: output})
+	return prompt
+}
+
 // Input data required to complete the task.
 func (prompt *Prompt) WithInput(about string, input []string) *Prompt {
 	prompt.Input = &Remark{
@@ -132,6 +151,10 @@ type Formatter interface {
 //	1. {requirements}
 //	2. {requirements}
 //	3. ...
+//
+//	Examples:
+//	Input: {input}
+//	Output: {output}
 //
 //	{about input}:
 //	- {input}
@@ -171,6 +194,25 @@ func (p defaultFormatter) ToString(sb *strings.Builder, prompt *Prompt) {
 
 	p.pp(sb, prompt.Instructions)
 	p.ol(sb, prompt.Requirements)
+
+	if len(prompt.Examples) > 0 {
+		sb.WriteString("Example")
+		if len(prompt.Examples) == 1 {
+			sb.WriteString("\n")
+		} else {
+			sb.WriteString("s\n")
+		}
+
+		for _, ex := range prompt.Examples {
+			sb.WriteString("Input:")
+			sb.WriteString(ex.Input)
+			sb.WriteString("\n")
+			sb.WriteString("Output:")
+			sb.WriteString(ex.Output)
+			sb.WriteString("\n")
+		}
+	}
+
 	p.ul(sb, prompt.Input)
 	p.ul(sb, prompt.Context)
 }

@@ -1,6 +1,7 @@
 package bedrock
 
 import (
+	"encoding"
 	"encoding/json"
 	"strings"
 
@@ -29,49 +30,52 @@ const (
 	LLAMA3_2_90B_INSTRUCT  = Llama3("meta.llama3-2-90b-instruct-v1:0")
 )
 
-func (v Llama3) String() string { return string(v) }
+func (v Llama3) ID() string { return string(v) }
 
-func (Llama3) Formatter() chatter.Formatter {
-	return llama3Prompter{chatter.NewFormatter("")}
-}
-
-func (Llama3) Encode(c *Client, prompt *chatter.Prompt, opts *chatter.Options) ([]byte, error) {
-	sb := strings.Builder{}
-	c.formatter.ToString(&sb, prompt)
-
-	inquery := llamaInquery{
-		Prompt:      sb.String(),
-		Temperature: opts.Temperature,
-		TopP:        opts.TopP,
-		MaxTokens:   c.quotaTokensInReply,
-	}
-
-	body, err := json.Marshal(inquery)
+func (v Llama3) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
+	txt, err := prompt.MarshalText()
 	if err != nil {
 		return nil, err
 	}
 
-	return body, nil
-}
-
-func (Llama3) Decode(c *Client, data []byte) (string, error) {
-	var reply llamaChatter
-	if err := json.Unmarshal(data, &reply); err != nil {
-		return "", err
+	req, err := json.Marshal(
+		llamaInquery{
+			Prompt:      v.encode(txt),
+			Temperature: opts.Temperature,
+			TopP:        opts.TopP,
+			MaxTokens:   opts.Quota,
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	c.consumedTokens += reply.UsedPromptTokens
-	c.consumedTokens += reply.UsedTextTokens
-
-	return reply.Text, nil
+	return req, nil
 }
 
-type llama3Prompter struct{ chatter.Formatter }
+func (Llama3) encode(prompt []byte) string {
+	var sb strings.Builder
 
-func (p llama3Prompter) ToString(sb *strings.Builder, prompt *chatter.Prompt) {
 	sb.WriteString("<|begin_of_text|>\n")
 	sb.WriteString("<|start_header_id|>user<|end_header_id|>\n")
-	p.Formatter.ToString(sb, prompt)
+	sb.Write(prompt)
 	sb.WriteString("<|eot_id|>\n")
 	sb.WriteString("<|start_header_id|>assistant<|end_header_id|>\n")
+
+	return sb.String()
+}
+
+func (Llama3) Decode(data []byte) (r Reply, err error) {
+	var reply llamaChatter
+
+	err = json.Unmarshal(data, &reply)
+	if err != nil {
+		return
+	}
+
+	r.Text = reply.Text
+	r.UsedInputTokens = reply.UsedPromptTokens
+	r.UsedReplyTokens = reply.UsedTextTokens
+
+	return
 }

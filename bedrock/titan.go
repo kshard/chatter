@@ -9,6 +9,7 @@
 package bedrock
 
 import (
+	"encoding"
 	"encoding/json"
 	"strings"
 
@@ -19,58 +20,59 @@ import (
 //
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-templates-and-examples.html
-type TitanText string
+type Titan string
 
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html
 const (
-	TITAN_TEXT_LITE_V1    = TitanText("amazon.titan-text-lite-v1")
-	TITAN_TEXT_EXPRESS_V1 = TitanText("amazon.titan-text-express-v1")
-	TITAN_TEXT_PREMIER_V1 = TitanText("amazon.titan-text-premier-v1:0")
+	TITAN_TEXT_LITE_V1    = Titan("amazon.titan-text-lite-v1")
+	TITAN_TEXT_EXPRESS_V1 = Titan("amazon.titan-text-express-v1")
+	TITAN_TEXT_PREMIER_V1 = Titan("amazon.titan-text-premier-v1:0")
 )
 
-func (v TitanText) String() string { return string(v) }
+func (v Titan) ID() string { return string(v) }
 
-func (TitanText) Formatter() chatter.Formatter {
-	return chatter.NewFormatter("")
-}
-
-func (TitanText) Encode(c *Client, prompt *chatter.Prompt, opts *chatter.Options) ([]byte, error) {
-	sb := strings.Builder{}
-	c.formatter.ToString(&sb, prompt)
-
-	inquery := titanInquery{
-		Prompt: sb.String(),
-		Config: titanInqueryConfig{
-			Temperature: opts.Temperature,
-			TopP:        opts.TopP,
-			MaxTokens:   c.quotaTokensInReply,
-		},
-	}
-
-	body, err := json.Marshal(inquery)
+func (Titan) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
+	txt, err := prompt.MarshalText()
 	if err != nil {
 		return nil, err
 	}
 
-	return body, nil
-}
-
-func (TitanText) Decode(c *Client, data []byte) (string, error) {
-	var reply titanChatter
-	if err := json.Unmarshal(data, &reply); err != nil {
-		return "", err
+	req, err := json.Marshal(
+		titanInquery{
+			Prompt: string(txt),
+			Config: titanInqueryConfig{
+				Temperature: opts.Temperature,
+				TopP:        opts.TopP,
+				MaxTokens:   opts.Quota,
+			},
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	sb := strings.Builder{}
+	return req, nil
+}
 
-	c.consumedTokens += reply.UsedPromptTokens
+func (Titan) Decode(data []byte) (r Reply, err error) {
+	var reply titanChatter
+
+	err = json.Unmarshal(data, &reply)
+	if err != nil {
+		return
+	}
+
+	r.UsedInputTokens = reply.UsedPromptTokens
+
+	sb := strings.Builder{}
 	for _, text := range reply.Result {
 		sb.WriteString(strings.TrimPrefix(text.Text, "Bot:"))
 		sb.WriteRune('\n')
-		c.consumedTokens += text.UsedTextTokens
+		r.UsedReplyTokens += text.UsedTextTokens
 	}
+	r.Text = sb.String()
 
-	return sb.String(), nil
+	return
 }
 
 type titanInquery struct {

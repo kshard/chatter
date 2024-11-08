@@ -140,11 +140,6 @@ func (prompt *Prompt) WithContext(about string, context []string) *Prompt {
 	return prompt
 }
 
-// Prompt to string formatter
-type Formatter interface {
-	ToString(*strings.Builder, *Prompt)
-}
-
 // Generic prompt formatter. Build prompt following the best approach
 //
 //	{role}. {task}. {instructions}.
@@ -165,22 +160,8 @@ type Formatter interface {
 //	- {context}
 //	- {context}
 //	- ...
-func NewFormatter(role string) Formatter {
-	return defaultFormatter{role: strings.TrimSpace(role)}
-}
-
-type defaultFormatter struct {
-	// Ground level constrain of the model behavior.
-	// The latin meaning "something that has been laid down".
-	// Think about it as a cornerstone of the model behavior.
-	// "Act as <stratum>" ...
-	role string
-}
-
-func (p defaultFormatter) ToString(sb *strings.Builder, prompt *Prompt) {
-	if len(prompt.Role) == 0 {
-		prompt.WithRole(p.role)
-	}
+func (prompt Prompt) MarshalText() (text []byte, err error) {
+	var sb strings.Builder
 
 	if len(prompt.Role) > 0 {
 		sb.WriteString(prompt.Role)
@@ -192,8 +173,8 @@ func (p defaultFormatter) ToString(sb *strings.Builder, prompt *Prompt) {
 		sb.WriteString(". ")
 	}
 
-	p.pp(sb, prompt.Instructions)
-	p.ol(sb, prompt.Requirements)
+	prompt.pp(&sb, prompt.Instructions)
+	prompt.ol(&sb, prompt.Requirements)
 
 	if len(prompt.Examples) > 0 {
 		sb.WriteString("Example")
@@ -213,12 +194,14 @@ func (p defaultFormatter) ToString(sb *strings.Builder, prompt *Prompt) {
 		}
 	}
 
-	p.ul(sb, prompt.Input)
-	p.ul(sb, prompt.Context)
+	prompt.ul(&sb, prompt.Input)
+	prompt.ul(&sb, prompt.Context)
+
+	return []byte(sb.String()), nil
 }
 
 // write remark as sequence of sentences
-func (p defaultFormatter) pp(sb *strings.Builder, remark *Remark) {
+func (prompt Prompt) pp(sb *strings.Builder, remark *Remark) {
 	if remark == nil || len(remark.Text) == 0 {
 		return
 	}
@@ -236,7 +219,7 @@ func (p defaultFormatter) pp(sb *strings.Builder, remark *Remark) {
 }
 
 // write remark as unordered list
-func (p defaultFormatter) ul(sb *strings.Builder, remark *Remark) {
+func (prompt Prompt) ul(sb *strings.Builder, remark *Remark) {
 	if remark == nil || len(remark.Text) == 0 {
 		return
 	}
@@ -259,7 +242,7 @@ func (p defaultFormatter) ul(sb *strings.Builder, remark *Remark) {
 }
 
 // write remark as ordered list
-func (p defaultFormatter) ol(sb *strings.Builder, remark *Remark) {
+func (prompt Prompt) ol(sb *strings.Builder, remark *Remark) {
 	if remark == nil || len(remark.Text) == 0 {
 		return
 	}

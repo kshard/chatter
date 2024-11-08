@@ -44,7 +44,17 @@
     <td>
       AWS Bedrock LLMs
     </td></tr>
-		<!-- Module bedrock -->
+    <!-- Module bedrock batch -->
+    <tr><td><a href=".">
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=bedrockbatch/*"/>
+    </a></td>
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/bedrockbatch">
+      <img src="https://img.shields.io/badge/doc-bedrockbatch-007d9c?logo=go&logoColor=white&style=platic" />
+    </a></td>
+    <td>
+      AWS Bedrock Batch Inference
+    </td></tr>
+		<!-- Module openai -->
     <tr><td><a href=".">
       <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*"/>
     </a></td>
@@ -78,7 +88,7 @@ The library addresses the LLMs comparisons by
 
 ```go
 type Chatter interface {
-	Prompt(context.Context, *Prompt) (*Prompt, error)
+	Prompt(context.Context, encoding.TextMarshaler, ...func(*Options)) (string, error)
 }
 ```
 
@@ -99,8 +109,7 @@ import (
 
 func main() {
 	assistant, err := bedrock.New(
-		bedrock.WithModel(bedrock.LLAMA3_0_8B_INSTRUCT),
-		bedrock.WithQuotaTokensInReply(512),
+		bedrock.WithLLM(bedrock.LLAMA3_0_8B_INSTRUCT),
 	)
 	if err != nil {
 		panic(err)

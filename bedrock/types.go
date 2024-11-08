@@ -9,53 +9,33 @@
 package bedrock
 
 import (
-	"github.com/aws/aws-sdk-go-v2/aws"
+	"context"
+	"encoding"
+
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/kshard/chatter"
 )
 
-// Config option for the client
-type Option func(*Client)
-
-// Config AWS endpoints
-func WithConfig(cfg aws.Config) Option {
-	return func(e *Client) {
-		e.api = bedrockruntime.NewFromConfig(cfg)
-	}
+// AWS Bedrock Runtime API
+type Bedrock interface {
+	InvokeModel(ctx context.Context, params *bedrockruntime.InvokeModelInput, optFns ...func(*bedrockruntime.Options)) (*bedrockruntime.InvokeModelOutput, error)
 }
 
-// Config AWS region
-func WithRegion(region string) Option {
-	return func(c *Client) {
-		c.region = region
-	}
+// Bedrock Foundational LLMs
+type LLM interface {
+	ID() string
+
+	// Encode prompt to bytes:
+	// - encoding prompt as prompt markup supported by LLM
+	// - encoding prompt to envelop supported by bedrock
+	Encode(encoding.TextMarshaler, *chatter.Options) ([]byte, error)
+
+	// Decode LLM's reply into pure text
+	Decode([]byte) (Reply, error)
 }
 
-// Config Bedrock model
-func WithModel(model Model) Option {
-	return func(c *Client) {
-		c.model = model
-		c.formatter = model.Formatter()
-	}
-}
-
-// Config Formatter
-func WithFormatter(formatter chatter.Formatter) Option {
-	return func(c *Client) {
-		c.formatter = formatter
-	}
-}
-
-// Config tokens quota in reply
-func WithQuotaTokensInReply(quota int) Option {
-	return func(c *Client) {
-		c.quotaTokensInReply = quota
-	}
-}
-
-type Model interface {
-	String() string
-	Formatter() chatter.Formatter
-	Encode(*Client, *chatter.Prompt, *chatter.Options) ([]byte, error)
-	Decode(*Client, []byte) (string, error)
+type Reply struct {
+	Text            string
+	UsedInputTokens int
+	UsedReplyTokens int
 }

@@ -9,6 +9,7 @@
 package bedrock
 
 import (
+	"encoding"
 	"encoding/json"
 	"strings"
 
@@ -28,41 +29,52 @@ const (
 	LLAMA2_70B_CHAT_V1 = Llama2("meta.llama2-70b-chat-v1")
 )
 
-func (v Llama2) String() string { return string(v) }
+func (v Llama2) ID() string { return string(v) }
 
-func (Llama2) Formatter() chatter.Formatter {
-	return llama2Prompter{chatter.NewFormatter("")}
-}
-
-func (Llama2) Encode(c *Client, prompt *chatter.Prompt, opts *chatter.Options) ([]byte, error) {
-	sb := strings.Builder{}
-	c.formatter.ToString(&sb, prompt)
-
-	inquery := llamaInquery{
-		Prompt:      sb.String(),
-		Temperature: opts.Temperature,
-		TopP:        opts.TopP,
-		MaxTokens:   c.quotaTokensInReply,
-	}
-
-	body, err := json.Marshal(inquery)
+func (v Llama2) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
+	txt, err := prompt.MarshalText()
 	if err != nil {
 		return nil, err
 	}
 
-	return body, nil
-}
-
-func (Llama2) Decode(c *Client, data []byte) (string, error) {
-	var reply llamaChatter
-	if err := json.Unmarshal(data, &reply); err != nil {
-		return "", err
+	req, err := json.Marshal(
+		llamaInquery{
+			Prompt:      v.encode(txt),
+			Temperature: opts.Temperature,
+			TopP:        opts.TopP,
+			MaxTokens:   opts.Quota,
+		},
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	c.consumedTokens += reply.UsedPromptTokens
-	c.consumedTokens += reply.UsedTextTokens
+	return req, nil
+}
 
-	return reply.Text, nil
+func (Llama2) encode(prompt []byte) string {
+	var sb strings.Builder
+
+	sb.WriteString("\n[INST]\n")
+	sb.Write(prompt)
+	sb.WriteString("\n[/INST]\n")
+
+	return sb.String()
+}
+
+func (Llama2) Decode(data []byte) (r Reply, err error) {
+	var reply llamaChatter
+
+	err = json.Unmarshal(data, &reply)
+	if err != nil {
+		return
+	}
+
+	r.Text = reply.Text
+	r.UsedInputTokens = reply.UsedPromptTokens
+	r.UsedReplyTokens = reply.UsedTextTokens
+
+	return
 }
 
 type llamaInquery struct {
@@ -77,12 +89,4 @@ type llamaChatter struct {
 	UsedPromptTokens int    `json:"prompt_token_count"`
 	UsedTextTokens   int    `json:"generation_token_count"`
 	StopReason       string `json:"stop_reason"`
-}
-
-type llama2Prompter struct{ chatter.Formatter }
-
-func (p llama2Prompter) ToString(sb *strings.Builder, prompt *chatter.Prompt) {
-	sb.WriteString("\n[INST]\n")
-	p.Formatter.ToString(sb, prompt)
-	sb.WriteString("\n[/INST]\n")
 }

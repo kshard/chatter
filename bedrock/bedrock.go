@@ -10,92 +10,76 @@ package bedrock
 
 import (
 	"context"
-	"fmt"
+	"encoding"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
+	"github.com/fogfish/opts"
 	"github.com/kshard/chatter"
 )
 
 // AWS Bedrock client
 type Client struct {
-	api                *bedrockruntime.Client
-	region             string
-	model              Model
-	formatter          chatter.Formatter
-	quotaTokensInReply int
-	consumedTokens     int
+	api             Bedrock
+	llm             LLM
+	usedInputTokens int
+	usedReplyTokens int
 }
+
+var _ chatter.Chatter = (*Client)(nil)
 
 // Create client to AWS BedRock.
 //
 // By default `us-east-1` region is used, use config options to alter behavior.
-func New(opts ...Option) (*Client, error) {
-	client := &Client{region: "us-east-1"}
+func New(opt ...Option) (*Client, error) {
+	c := Client{}
 
-	for _, opt := range opts {
-		opt(client)
-	}
-
-	if client.api == nil {
-		api, err := newService(client.region)
-		if err != nil {
-			return nil, err
-		}
-		client.api = api
-	}
-
-	if client.model == nil {
-		return nil, fmt.Errorf("undefined model")
-	}
-
-	return client, nil
-}
-
-func newService(region string) (*bedrockruntime.Client, error) {
-	aws, err := config.LoadDefaultConfig(
-		context.Background(),
-		config.WithRegion(region),
-	)
-	if err != nil {
+	if err := opts.Apply(&c, opt); err != nil {
 		return nil, err
 	}
 
-	return bedrockruntime.NewFromConfig(aws), nil
+	if c.api == nil {
+		if err := optsFromRegion(&c, "us-east-1"); err != nil {
+			return nil, err
+		}
+	}
+
+	return &c, c.checkRequired()
 }
 
-// Number of tokens consumed within the session
-func (c *Client) ConsumedTokens() int { return c.consumedTokens }
+func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
+func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Prompt the model
-func (c *Client) Prompt(ctx context.Context, prompt *chatter.Prompt, opts ...func(*chatter.Options)) (string, error) {
-	opt := chatter.Options{Temperature: chatter.DefaultTemperature, TopP: chatter.DefaultTopP}
+func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts ...func(*chatter.Options)) (string, error) {
+	opt := chatter.NewOptions()
 	for _, o := range opts {
 		o(&opt)
 	}
 
-	body, err := c.model.Encode(c, prompt, &opt)
+	req, err := c.llm.Encode(prompt, &opt)
 	if err != nil {
 		return "", err
 	}
 
-	req := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(c.model.String()),
+	inquiry := &bedrockruntime.InvokeModelInput{
+		ModelId:     aws.String(c.llm.ID()),
 		ContentType: aws.String("application/json"),
-		Accept:      aws.String("application/json"),
-		Body:        body,
+		Body:        req,
 	}
 
-	result, err := c.api.InvokeModel(ctx, req)
+	result, err := c.api.InvokeModel(ctx, inquiry)
 	if err != nil {
 		return "", err
 	}
 
-	reply, err := c.model.Decode(c, result.Body)
+	reply, err := c.llm.Decode(result.Body)
 	if err != nil {
 		return "", err
 	}
 
-	return reply, nil
+	c.usedInputTokens += reply.UsedInputTokens
+	c.usedReplyTokens += reply.UsedReplyTokens
+
+	return reply.Text, nil
 }

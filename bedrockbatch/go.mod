@@ -1,27 +1,24 @@
-module github.com/kshard/chatter/examples
+module github.com/kshard/chatter/bedrockbatch
 
 go 1.23.1
 
-replace github.com/kshard/chatter => ../
-
-replace github.com/kshard/chatter/openai => ../openai
-
-replace github.com/kshard/chatter/bedrock => ../bedrock
-
-replace github.com/kshard/chatter/bedrockbatch => ../bedrockbatch
-
 require (
+	github.com/aws/aws-cdk-go/awscdk/v2 v2.164.1
+	github.com/aws/aws-sdk-go-v2 v1.32.3
+	github.com/aws/aws-sdk-go-v2/config v1.27.11
+	github.com/aws/aws-sdk-go-v2/service/bedrock v1.22.0
+	github.com/aws/constructs-go/constructs/v10 v10.4.2
+	github.com/aws/jsii-runtime-go v1.103.1
+	github.com/fogfish/guid/v2 v2.1.0
+	github.com/fogfish/opts v0.0.2
+	github.com/fogfish/stream v1.2.1
 	github.com/kshard/chatter v0.1.0
 	github.com/kshard/chatter/bedrock v0.0.6
-	github.com/kshard/chatter/bedrockbatch v0.0.0-00010101000000-000000000000
 )
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
-	github.com/aws/aws-cdk-go/awscdk/v2 v2.164.1 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.32.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.27.11 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.11 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.1 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15 // indirect
@@ -29,7 +26,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.22 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/bedrock v1.22.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.7.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.7 // indirect
@@ -39,8 +35,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.20.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.6 // indirect
-	github.com/aws/constructs-go/constructs/v10 v10.4.2 // indirect
-	github.com/aws/jsii-runtime-go v1.103.1 // indirect
 	github.com/aws/smithy-go v1.22.0 // indirect
 	github.com/cdklabs/awscdk-asset-awscli-go/awscliv1/v2 v2.2.202 // indirect
 	github.com/cdklabs/awscdk-asset-kubectl-go/kubectlv20/v2 v2.1.2 // indirect
@@ -49,9 +43,6 @@ require (
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/fogfish/golem/hseq v1.2.0 // indirect
 	github.com/fogfish/golem/optics v0.13.1 // indirect
-	github.com/fogfish/guid/v2 v2.1.0 // indirect
-	github.com/fogfish/opts v0.0.2 // indirect
-	github.com/fogfish/stream v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect

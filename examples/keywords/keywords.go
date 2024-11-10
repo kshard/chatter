@@ -18,8 +18,7 @@ import (
 
 func main() {
 	assistant, err := bedrock.New(
-		bedrock.WithModel(bedrock.LLAMA3_0_8B_INSTRUCT),
-		bedrock.WithQuotaTokensInReply(512),
+		bedrock.WithLLM(bedrock.LLAMA3_0_8B_INSTRUCT),
 	)
 	if err != nil {
 		panic(err)
@@ -28,12 +27,16 @@ func main() {
 	var prompt chatter.Prompt
 	prompt.WithTask("Extract keywords from the text: %s", text)
 
-	reply, err := assistant.Prompt(context.Background(), &prompt)
+	reply, err := assistant.Prompt(context.Background(), &prompt,
+		chatter.WithTemperature(0.9),
+		chatter.WithQuota(512),
+	)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("==> (%d tokens)\n%s\n", assistant.ConsumedTokens(), reply)
+	fmt.Printf("==> (in: %d out: %d tokens)\n%s\n",
+		assistant.UsedInputTokens(), assistant.UsedReplyTokens(), reply)
 }
 
 const text = `

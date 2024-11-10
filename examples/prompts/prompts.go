@@ -48,13 +48,12 @@ var review = []string{
 
 func main() {
 	assistant, err := chat.New(
-		chat.WithModel(chat.LLAMA3_0_8B_INSTRUCT),
+		chat.WithLLM(chat.LLAMA3_0_8B_INSTRUCT),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	formater := chatter.NewFormatter("")
 	prompts := []chatter.Prompt{
 		level0(),
 		level1(),
@@ -69,7 +68,11 @@ func main() {
 		var sb strings.Builder
 		sb.WriteString(fmt.Sprintf("## Level: %d\n", i))
 		sb.WriteString("### Question\n")
-		formater.ToString(&sb, &prompt)
+		txt, err := prompt.MarshalText()
+		if err != nil {
+			panic(err)
+		}
+		sb.Write(txt)
 		sb.WriteString("\n")
 
 		reply, err := assistant.Prompt(context.Background(), &prompt)

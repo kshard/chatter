@@ -54,6 +54,16 @@
     <td>
       AWS Bedrock Batch Inference
     </td></tr>
+    <!-- Module LLM caching -->
+    <tr><td><a href=".">
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=cache/*"/>
+    </a></td>
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/cache">
+      <img src="https://img.shields.io/badge/doc-cache-007d9c?logo=go&logoColor=white&style=platic" />
+    </a></td>
+    <td>
+      LLMs query/reply caching
+    </td></tr>
 		<!-- Module openai -->
     <tr><td><a href=".">
       <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*"/>

@@ -10,14 +10,15 @@ package openai
 
 import (
 	"context"
+	"encoding"
 	"errors"
-	"strings"
 
 	"github.com/kshard/chatter"
 
 	"github.com/fogfish/gurl/v2/http"
 	ƒ "github.com/fogfish/gurl/v2/http/recv"
 	ø "github.com/fogfish/gurl/v2/http/send"
+	"github.com/fogfish/opts"
 )
 
 // Creates OpenAI Chat (completion) client.
@@ -31,51 +32,51 @@ import (
 //	WithNetRC(host string)
 //	WithModel(...)
 //	WithHTTP(opts ...http.Config)
-func New(opts ...Option) (*Client, error) {
-	api := &Client{host: ø.Authority("https://api.openai.com")}
+func New(opt ...Option) (*Client, error) {
+	api := Client{host: ø.Authority("https://api.openai.com")}
 
-	defs := []Option{
-		WithModel(GPT_35_TURBO_0125),
-		WithNetRC(string("api.openai.com")),
-	}
-
-	for _, opt := range defs {
-		opt(api)
-	}
-
-	for _, opt := range opts {
-		opt(api)
+	if err := opts.Apply(&api, opt); err != nil {
+		return nil, err
 	}
 
 	if api.Stack == nil {
 		api.Stack = http.New()
 	}
 
-	return api, nil
+	return &api, api.checkRequired()
 }
 
-// Number of tokens consumed within the session
-func (c *Client) ConsumedTokens() int { return c.consumedTokens }
+func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
+func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Send prompt
-func (c *Client) Prompt(ctx context.Context, prompt *chatter.Prompt, opts ...func(*chatter.Options)) (string, error) {
-	var sb strings.Builder
-	c.formatter.ToString(&sb, prompt)
+func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts ...func(*chatter.Options)) (string, error) {
+	txt, err := prompt.MarshalText()
+	if err != nil {
+		return "", err
+	}
+
+	opt := chatter.NewOptions()
+	for _, o := range opts {
+		o(&opt)
+	}
 
 	seq := []message{
-		{Role: "user", Content: sb.String()},
+		{Role: "user", Content: string(txt)},
 	}
 
 	bag, err := http.IO[modelChatter](c.WithContext(ctx),
 		http.POST(
 			ø.URI("%s/v1/chat/completions", c.host),
 			ø.Accept.JSON,
-			ø.Authorization.Set(c.secret),
+			ø.Authorization.Set("Bearer "+c.secret),
 			ø.ContentType.JSON,
 			ø.Send(modelInquery{
-				Model:     c.model,
-				Messages:  seq,
-				MaxTokens: c.quotaTokensInReply,
+				Model:       c.llm,
+				Messages:    seq,
+				MaxTokens:   opt.Quota,
+				Temperature: opt.Temperature,
+				TopP:        opt.TopP,
 			}),
 
 			ƒ.Status.OK,
@@ -86,7 +87,9 @@ func (c *Client) Prompt(ctx context.Context, prompt *chatter.Prompt, opts ...fun
 		return "", err
 	}
 
-	c.consumedTokens += bag.Usage.UsedTokens
+	c.usedInputTokens += bag.Usage.PromptTokens
+	c.usedReplyTokens += bag.Usage.OutputTokens
+
 	if len(bag.Choices) == 0 {
 		return "", errors.New("empty response")
 	}

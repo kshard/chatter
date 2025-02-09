@@ -75,7 +75,7 @@ type LLM interface {
 
 	// Encode prompt to bytes:
 	// - encoding prompt as prompt markup supported by LLM
-	// - encoding prompt to envelop supported by bedrock
+	// - encoding prompt to envelop supported by LLM's hosting platform
 	Encode(encoding.TextMarshaler, *Options) ([]byte, error)
 
 	// Decode LLM's reply into pure text

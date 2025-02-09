@@ -67,3 +67,23 @@ func WithTopP(p float64) func(*Options) {
 func WithQuota(quota int) func(*Options) {
 	return func(opt *Options) { opt.Quota = quota }
 }
+
+// Foundational identity of LLMs
+type LLM interface {
+	// Model ID as defined by the vendor
+	ModelID() string
+
+	// Encode prompt to bytes:
+	// - encoding prompt as prompt markup supported by LLM
+	// - encoding prompt to envelop supported by bedrock
+	Encode(encoding.TextMarshaler, *Options) ([]byte, error)
+
+	// Decode LLM's reply into pure text
+	Decode([]byte) (Reply, error)
+}
+
+type Reply struct {
+	Text            string
+	UsedInputTokens int
+	UsedReplyTokens int
+}

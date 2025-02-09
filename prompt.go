@@ -15,7 +15,28 @@ import (
 	"strings"
 )
 
-// Prompt data type consisting of context and bag of exchange messages.
+// Prompt data type consisting of context and LLM prompt.
+// The prompt type resembes TELeR taxonomy following the structure:
+//
+//	{role}. {task}. {instructions}.
+//	1. {requirements}
+//	2. {requirements}
+//	3. ...
+//
+//	Examples:
+//	Input: {input}
+//	Output: {output}
+//
+//	{about input}:
+//	- {input}
+//	- {input}
+//	- ...
+//
+//	{about context}
+//	- {context}
+//	- {context}
+//	- ...
+
 type Prompt struct {
 	// Ground level constrain of the model behavior.
 	// The latin meaning "something that has been laid down".
@@ -140,26 +161,7 @@ func (prompt *Prompt) WithContext(about string, context []string) *Prompt {
 	return prompt
 }
 
-// Generic prompt formatter. Build prompt following the best approach
-//
-//	{role}. {task}. {instructions}.
-//	1. {requirements}
-//	2. {requirements}
-//	3. ...
-//
-//	Examples:
-//	Input: {input}
-//	Output: {output}
-//
-//	{about input}:
-//	- {input}
-//	- {input}
-//	- ...
-//
-//	{about context}
-//	- {context}
-//	- {context}
-//	- ...
+// Marshal prompt into text
 func (prompt Prompt) MarshalText() (text []byte, err error) {
 	var sb strings.Builder
 
@@ -185,10 +187,10 @@ func (prompt Prompt) MarshalText() (text []byte, err error) {
 		}
 
 		for _, ex := range prompt.Examples {
-			sb.WriteString("Input:")
+			sb.WriteString("Input: ")
 			sb.WriteString(ex.Input)
 			sb.WriteString("\n")
-			sb.WriteString("Output:")
+			sb.WriteString("Output: ")
 			sb.WriteString(ex.Output)
 			sb.WriteString("\n")
 		}
@@ -197,7 +199,8 @@ func (prompt Prompt) MarshalText() (text []byte, err error) {
 	prompt.ul(&sb, prompt.Input)
 	prompt.ul(&sb, prompt.Context)
 
-	return []byte(sb.String()), nil
+	s := strings.TrimSpace(sb.String())
+	return []byte(s), nil
 }
 
 // write remark as sequence of sentences

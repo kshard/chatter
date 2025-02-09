@@ -8,4 +8,4 @@
 
 package cache
 
-const Version = "cache/v0.0.1"
+const Version = "cache/v0.0.2"

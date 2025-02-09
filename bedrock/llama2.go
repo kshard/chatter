@@ -23,13 +23,15 @@ import (
 // * https://replicate.com/blog/how-to-prompt-llama
 type Llama2 string
 
+var _ chatter.LLM = Llama2("")
+
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html
 const (
 	LLAMA2_13B_CHAT_V1 = Llama2("meta.llama2-13b-chat-v1")
 	LLAMA2_70B_CHAT_V1 = Llama2("meta.llama2-70b-chat-v1")
 )
 
-func (v Llama2) ID() string { return string(v) }
+func (v Llama2) ModelID() string { return string(v) }
 
 func (v Llama2) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
 	txt, err := prompt.MarshalText()
@@ -62,7 +64,7 @@ func (Llama2) encode(prompt []byte) string {
 	return sb.String()
 }
 
-func (Llama2) Decode(data []byte) (r Reply, err error) {
+func (Llama2) Decode(data []byte) (r chatter.Reply, err error) {
 	var reply llamaChatter
 
 	err = json.Unmarshal(data, &reply)

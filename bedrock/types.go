@@ -10,7 +10,6 @@ package bedrock
 
 import (
 	"context"
-	"encoding"
 
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/kshard/chatter"
@@ -21,21 +20,4 @@ type Bedrock interface {
 	InvokeModel(ctx context.Context, params *bedrockruntime.InvokeModelInput, optFns ...func(*bedrockruntime.Options)) (*bedrockruntime.InvokeModelOutput, error)
 }
 
-// Bedrock Foundational LLMs
-type LLM interface {
-	ID() string
-
-	// Encode prompt to bytes:
-	// - encoding prompt as prompt markup supported by LLM
-	// - encoding prompt to envelop supported by bedrock
-	Encode(encoding.TextMarshaler, *chatter.Options) ([]byte, error)
-
-	// Decode LLM's reply into pure text
-	Decode([]byte) (Reply, error)
-}
-
-type Reply struct {
-	Text            string
-	UsedInputTokens int
-	UsedReplyTokens int
-}
+type LLM chatter.LLM

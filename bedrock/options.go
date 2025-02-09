@@ -26,6 +26,8 @@ func (c *Client) checkRequired() error {
 	)
 }
 
+const defaultRegion = "us-west-2"
+
 var (
 	// Set AWS Bedrock Foundational LLM
 	//
@@ -39,7 +41,7 @@ var (
 	WithRegion = opts.FMap(optsFromRegion)
 
 	// Set us-west-2 as default region
-	WithDefaultRegion = WithRegion("us-east-1")
+	WithDefaultRegion = WithRegion(defaultRegion)
 
 	// Set AWS Bedrock Runtime
 	WithBedrock = opts.ForType[Client, Bedrock]()

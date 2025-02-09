@@ -39,7 +39,7 @@ func New(opt ...Option) (*Client, error) {
 	}
 
 	if c.api == nil {
-		if err := optsFromRegion(&c, "us-east-1"); err != nil {
+		if err := optsFromRegion(&c, defaultRegion); err != nil {
 			return nil, err
 		}
 	}
@@ -63,7 +63,7 @@ func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts
 	}
 
 	inquiry := &bedrockruntime.InvokeModelInput{
-		ModelId:     aws.String(c.llm.ID()),
+		ModelId:     aws.String(c.llm.ModelID()),
 		ContentType: aws.String("application/json"),
 		Body:        req,
 	}

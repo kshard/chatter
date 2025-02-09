@@ -66,8 +66,8 @@ github.com/fogfish/golem/optics v0.13.1 h1:gkvJ5f7/AXaL8EuHLu5dgE/BwUSg/WX50D7b8
 github.com/fogfish/golem/optics v0.13.1/go.mod h1:U1y90OVcXF/A61dIP3abQ0x2GweTmzVHPC15pv0pcM0=
 github.com/fogfish/guid/v2 v2.1.0 h1:oEJHKM4yFOOCmKZdh0oH7eD3mL32n2+1YCc27lXB5rE=
 github.com/fogfish/guid/v2 v2.1.0/go.mod h1:KkZ5T4EE3BqWQJFZBPLSHV/tBe23Xq4KvuPfwtNtepU=
-github.com/fogfish/it/v2 v2.0.2 h1:UR6yVemf8zD3WVs6Bq0zE6LJwapZ8urv9zvU5VB5E6o=
-github.com/fogfish/it/v2 v2.0.2/go.mod h1:HHwufnTaZTvlRVnSesPl49HzzlMrQtweKbf+8Co/ll4=
+github.com/fogfish/it/v2 v2.2.1 h1:NuuaENAZka8XiJkEj2Q6THRsHSwleC/BLDux82NvkII=
+github.com/fogfish/it/v2 v2.2.1/go.mod h1:HHwufnTaZTvlRVnSesPl49HzzlMrQtweKbf+8Co/ll4=
 github.com/fogfish/opts v0.0.2 h1:Iro+QQHR/l6G5afX6N5TtqZtV+iVeUxJUOpW63gqhwk=
 github.com/fogfish/opts v0.0.2/go.mod h1:fAM7yksrn+u5opbyAh2HiObd5Zx54WnSMGZIU21AGFw=
 github.com/fogfish/stream v1.2.1 h1:gq2qyGf8QUOck/AdavbAfylMLgS+P2QequS4vRY3RII=

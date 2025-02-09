@@ -11,9 +11,9 @@ replace github.com/kshard/chatter/bedrock => ../bedrock
 replace github.com/kshard/chatter/bedrockbatch => ../bedrockbatch
 
 require (
-	github.com/kshard/chatter v0.1.0
+	github.com/kshard/chatter v0.2.0
 	github.com/kshard/chatter/bedrock v0.0.6
-	github.com/kshard/chatter/bedrockbatch v0.0.0-00010101000000-000000000000
+	github.com/kshard/chatter/bedrockbatch v0.0.2
 )
 
 require (

@@ -8,7 +8,7 @@ require (
 	github.com/fogfish/gurl/v2 v2.10.0
 	github.com/fogfish/opts v0.0.2
 	github.com/jdxcode/netrc v1.0.0
-	github.com/kshard/chatter v0.1.0
+	github.com/kshard/chatter v0.2.0
 )
 
 require (

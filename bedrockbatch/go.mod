@@ -12,7 +12,7 @@ require (
 	github.com/fogfish/guid/v2 v2.1.0
 	github.com/fogfish/opts v0.0.2
 	github.com/fogfish/stream v1.2.1
-	github.com/kshard/chatter v0.1.0
+	github.com/kshard/chatter v0.2.0
 	github.com/kshard/chatter/bedrock v0.0.6
 )
 

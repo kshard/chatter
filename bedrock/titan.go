@@ -22,6 +22,8 @@ import (
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-templates-and-examples.html
 type Titan string
 
+var _ chatter.LLM = Titan("")
+
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html
 const (
 	TITAN_TEXT_LITE_V1    = Titan("amazon.titan-text-lite-v1")
@@ -29,7 +31,7 @@ const (
 	TITAN_TEXT_PREMIER_V1 = Titan("amazon.titan-text-premier-v1:0")
 )
 
-func (v Titan) ID() string { return string(v) }
+func (v Titan) ModelID() string { return string(v) }
 
 func (Titan) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
 	txt, err := prompt.MarshalText()
@@ -54,7 +56,7 @@ func (Titan) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byt
 	return req, nil
 }
 
-func (Titan) Decode(data []byte) (r Reply, err error) {
+func (Titan) Decode(data []byte) (r chatter.Reply, err error) {
 	var reply titanChatter
 
 	err = json.Unmarshal(data, &reply)

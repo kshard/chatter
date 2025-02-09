@@ -16,6 +16,8 @@ import (
 // * https://www.llama.com/docs/model-cards-and-prompt-formats/meta-llama-3/
 type Llama3 string
 
+var _ chatter.LLM = Llama2("")
+
 // See model id
 // https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html#model-ids-arns
 const (
@@ -30,7 +32,7 @@ const (
 	LLAMA3_2_90B_INSTRUCT  = Llama3("meta.llama3-2-90b-instruct-v1:0")
 )
 
-func (v Llama3) ID() string { return string(v) }
+func (v Llama3) ModelID() string { return string(v) }
 
 func (v Llama3) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
 	txt, err := prompt.MarshalText()
@@ -65,7 +67,7 @@ func (Llama3) encode(prompt []byte) string {
 	return sb.String()
 }
 
-func (Llama3) Decode(data []byte) (r Reply, err error) {
+func (Llama3) Decode(data []byte) (r chatter.Reply, err error) {
 	var reply llamaChatter
 
 	err = json.Unmarshal(data, &reply)

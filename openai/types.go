@@ -9,113 +9,93 @@
 package openai
 
 import (
+	"fmt"
 	"os/user"
 	"path/filepath"
 
 	"github.com/fogfish/gurl/v2/http"
 	ø "github.com/fogfish/gurl/v2/http/send"
+	"github.com/fogfish/opts"
 	"github.com/jdxcode/netrc"
-	"github.com/kshard/chatter"
 )
 
-// Config option for the client
-type Option func(*Client)
-
-type ModelID string
+type LLM string
 
 const (
-	GPT_35_TURBO_0125     = ModelID("gpt-3.5-turbo-0125")
-	GPT_35_TURBO_INSTRUCT = ModelID("gpt-3.5-turbo-instruct")
-	GPT_4                 = ModelID("gpt-4")
-	GPT_4_32K             = ModelID("gpt-4-32k")
-	GPT_4o                = ModelID("gpt-4o")
-	GPT_4o_MINI           = ModelID("gpt-4o-mini")
+	GPT_35_TURBO_0125     = LLM("gpt-3.5-turbo-0125")
+	GPT_35_TURBO_INSTRUCT = LLM("gpt-3.5-turbo-instruct")
+	GPT_4                 = LLM("gpt-4")
+	GPT_4_32K             = LLM("gpt-4-32k")
+	GPT_4O                = LLM("gpt-4o")
+	GPT_4O_MINI           = LLM("gpt-4o-mini")
+	GPT_O1                = LLM("o1")
+	GPT_O3_MINI           = LLM("o3-mini")
 )
 
-// Config the model
-func WithModel(id ModelID) Option {
-	return func(c *Client) {
-		c.model = id
-		c.formatter = chatter.NewFormatter("")
-	}
+type Option = opts.Option[Client]
+
+func (c *Client) checkRequired() error {
+	return opts.Required(c,
+		WithLLM(""),
+	)
 }
 
-// Config the http stack
-func WithHTTP(opts ...http.Config) Option {
-	return func(c *Client) {
-		c.Stack = http.New(opts...)
+var (
+	// Set OpenAI LLM
+	//
+	// This option is required.
+	WithLLM = opts.ForType[Client, LLM]()
+
+	// Config HTTP stack
+	WithHTTP = opts.Use[Client](http.NewStack)
+
+	// Config the host, api.openai.com is default
+	WithHost = opts.ForType[Client, ø.Authority]()
+
+	// Config API secret key
+	WithSecret = opts.ForName[Client, string]("secret")
+
+	// Set api secret from ~/.netrc file
+	WithNetRC = opts.FMap(withNetRC)
+)
+
+func withNetRC(h *Client, host string) error {
+	if h.secret != "" {
+		return nil
 	}
-}
 
-// Config the host, api.openai.com is default
-func WithHost(host string) Option {
-	return func(c *Client) {
-		c.host = ø.Authority(host)
+	usr, err := user.Current()
+	if err != nil {
+		return err
 	}
-}
 
-// Config the secret explicitly
-func WithSecret(secret string) Option {
-	return func(c *Client) {
-		c.secret = "Bearer " + secret
+	n, err := netrc.Parse(filepath.Join(usr.HomeDir, ".netrc"))
+	if err != nil {
+		return err
 	}
-}
 
-// Config the secret from .netrc
-func WithNetRC(host string) Option {
-	return func(c *Client) {
-		if c.secret != "" {
-			return
-		}
-
-		usr, err := user.Current()
-		if err != nil {
-			panic(err)
-		}
-
-		n, err := netrc.Parse(filepath.Join(usr.HomeDir, ".netrc"))
-		if err != nil {
-			panic(err)
-		}
-
-		machine := n.Machine(host)
-		if machine == nil {
-			return
-			// panic(fmt.Errorf("undefined secret for host <%s> at ~/.netrc", host))
-		}
-
-		c.secret = "Bearer " + machine.Get("password")
+	machine := n.Machine(host)
+	if machine == nil {
+		return fmt.Errorf("undefined secret for host <%s> at ~/.netrc", host)
 	}
-}
 
-// Config tokens quota in reply
-func WithQuotaTokensInReply(quota int) Option {
-	return func(c *Client) {
-		c.quotaTokensInReply = quota
-	}
-}
-
-// Config Formatter
-func WithFormatter(formatter chatter.Formatter) Option {
-	return func(c *Client) {
-		c.formatter = formatter
-	}
+	h.secret = machine.Get("password")
+	return nil
 }
 
 // OpenAI client
 type Client struct {
 	http.Stack
-	host               ø.Authority
-	secret             string
-	model              ModelID
-	formatter          chatter.Formatter
-	quotaTokensInReply int
-	consumedTokens     int
+	host            ø.Authority
+	secret          string
+	llm             LLM
+	usedInputTokens int
+	usedReplyTokens int
 }
 
 // See https://platform.openai.com/docs/api-reference/chat/create
 type modelInquery struct {
-	Model       ModelID   `json:"model"`
+	Model       LLM       `json:"model"`
 	Messages    []message `json:"messages"`
 	MaxTokens   int       `json:"max_tokens,omitempty"`
 	Temperature float64   `json:"temperature,omitempty"`

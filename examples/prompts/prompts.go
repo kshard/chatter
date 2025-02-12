@@ -105,7 +105,7 @@ func level2() (prompt chatter.Prompt) {
 		common strengths/weaknesses mentioned by multiple reviewers, suggestions
 		for improvement.
 	`)
-	prompt.WithInput("The review texts are below:", review)
+	prompt.WithInput("The text for review is below:", review)
 	return
 }
 

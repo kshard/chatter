@@ -14,10 +14,12 @@ require (
 	github.com/kshard/chatter v0.2.0
 	github.com/kshard/chatter/bedrock v0.0.6
 	github.com/kshard/chatter/bedrockbatch v0.0.2
+	github.com/kshard/chatter/openai v0.0.0-00010101000000-000000000000
 )
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
+	github.com/ajg/form v1.5.2-0.20200323032839-9aeb3cf462e1 // indirect
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.164.1 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.32.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.2 // indirect
@@ -50,13 +52,17 @@ require (
 	github.com/fogfish/golem/hseq v1.2.0 // indirect
 	github.com/fogfish/golem/optics v0.13.1 // indirect
 	github.com/fogfish/guid/v2 v2.1.0 // indirect
+	github.com/fogfish/gurl/v2 v2.10.0 // indirect
 	github.com/fogfish/opts v0.0.2 // indirect
 	github.com/fogfish/stream v1.2.1 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
+	github.com/jdxcode/netrc v1.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.20.0 // indirect
+	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.23.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect

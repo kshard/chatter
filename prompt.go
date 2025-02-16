@@ -15,261 +15,327 @@ import (
 	"strings"
 )
 
-// Prompt data type consisting of context and LLM prompt.
-// The prompt type resembes TELeR taxonomy following the structure:
+// Prompt standardizes taxonomy of prompts for LLMs to solve complex tasks.
+// See https://aclanthology.org/2023.findings-emnlp.946.pdf
 //
-//	{role}. {task}. {instructions}.
-//	1. {requirements}
-//	2. {requirements}
-//	3. ...
+// The container allows application to maintain semi-strucuted prompts while
+// enabling efficient serialization into the textual prompt (aiming for quality).
+// At the glance the prompt is structured:
 //
-//	Examples:
-//	Input: {input}
-//	Output: {output}
-//
-//	{about input}:
-//	- {input}
-//	- {input}
-//	- ...
-//
-//	{about context}
-//	- {context}
-//	- {context}
-//	- ...
-
+//	 {task}.
+//		1. {requirements}
+//		2. ...
+//	 {feedback}
+//	 {examples}
+//	 {context}
+//	 ...
+//	 {input}
 type Prompt struct {
-	// Ground level constrain of the model behavior.
-	// The latin meaning "something that has been laid down".
-	// Think about it as a cornerstone of the model behavior.
-	// "Act as <role>" ...
-	Role string `json:"stratum,omitempty"`
-
-	// The task is a summary of what you want the prompt to do.
-	Task string `json:"task,omitempty"`
-
-	// Instructions informs model how to complete the task.
-	// Examples of how it could go about tasks.
-	Instructions *Remark `json:"instructions,omitempty"`
-
-	// Requirements is all about giving as much information as possible to ensure
-	// your response does not use any incorrect assumptions.
-	Requirements *Remark `json:"requirements,omitempty"`
-
-	// Examples how to complete the task
-	Examples []Example `json:"examples,omitempty"`
-
-	// Input data required to complete the task.
-	Input *Remark `json:"input,omitempty"`
-
-	// Additional information required to complete the task.
-	Context *Remark `json:"context,omitempty"`
-}
-
-// Remark is the sequence to statements annotated with note for the model.
-type Remark struct {
-	Note string   `json:"note,omitempty"`
-	Text []string `json:"text,omitempty"`
-}
-
-// Example is input output pair
-type Example struct {
-	Input  string `json:"input,omitempty"`
-	Output string `json:"output,omitempty"`
-}
-
-// Setting a specific role for a given prompt increases the likelihood of
-// more accurate information, when done appropriately.
-func (prompt *Prompt) WithRole(role string) *Prompt {
-	prompt.Role = strings.TrimSuffix(strings.TrimSpace(role), ".")
-	return prompt
+	Task     string    `json:"task,omitempty"`
+	Sections []Section `json:"sections,omitempty"`
 }
 
 // The task is a summary of what you want the prompt to do.
 func (prompt *Prompt) WithTask(task string, args ...any) *Prompt {
-	prompt.Task = fmt.Sprintf(
-		strings.TrimSuffix(strings.TrimSpace(task), "."),
-		args...,
-	)
+	prompt.Task = fmt.Sprintf(Sentence(task), args...)
 	return prompt
 }
 
-// Instructions informs model how to complete the task.
-// Examples of how it could go about tasks.
-func (prompt *Prompt) WithInstruction(ins string, args ...any) *Prompt {
-	if prompt.Instructions == nil {
-		prompt.Instructions = &Remark{Note: "", Text: []string{}}
+// Append section to prompt
+func (prompt *Prompt) With(s Section) *Prompt {
+	prompt.Sections = append(prompt.Sections, s)
+	return prompt
+}
+
+// Helper function to make sequence of single prompt
+func (prompt *Prompt) ToSeq() []fmt.Stringer { return []fmt.Stringer{prompt} }
+
+// The prompt consisting of multiple sections, each is block of text.
+type Section interface {
+	fmt.Stringer
+	Kind() Kind
+}
+
+// The type of the section.
+type Kind int
+
+const (
+	TEXT Kind = iota
+	RULES
+	FEEDBACK
+	EXAMPLE
+	CONTEXT
+	INPUT
+)
+
+// Snippet is the sequence to statements annotated with note for the model.
+type Snippet struct {
+	Type Kind     `json:"type,omitempty"`
+	Note string   `json:"note,omitempty"`
+	Text []string `json:"text,omitempty"`
+}
+
+func (r Snippet) Kind() Kind { return r.Type }
+
+func (r Snippet) String() string {
+	switch r.Type {
+	case TEXT:
+		return r.toText()
+	case RULES:
+		return r.toRules()
+	case FEEDBACK:
+		return r.toList()
+	case CONTEXT:
+		return r.toList()
+	case INPUT:
+		return r.toList()
+	default:
+		return r.toText()
+	}
+}
+
+// convert snippet to block of text
+func (r Snippet) toText() string {
+	seq := make([]string, 0)
+	if len(r.Note) > 0 {
+		seq = append(seq, Sentence(r.Note))
+	}
+	for _, t := range r.Text {
+		seq = append(seq, Sentence(t))
 	}
 
-	prompt.Instructions.Text = append(
-		prompt.Instructions.Text,
-		fmt.Sprintf(strings.TrimSpace(ins), args...),
-	)
-	return prompt
+	return strings.Join(seq, " ")
+}
+
+// convert snippet to unordered list
+func (r Snippet) toList() string {
+	seq := make([]string, 0)
+	if len(r.Note) > 0 {
+		seq = append(seq, sentence(r.Note, ":"))
+	}
+	for _, t := range r.Text {
+		seq = append(seq, "- "+Sentence(t))
+	}
+
+	return strings.Join(seq, "\n")
+}
+
+// convert snippet to ordered list
+func (r Snippet) toRules() string {
+	seq := make([]string, 0)
+	if len(r.Note) > 0 {
+		seq = append(seq, sentence(r.Note, ":"))
+	}
+	for i, t := range r.Text {
+		seq = append(seq, strconv.Itoa(i+1)+". "+Sentence(t))
+	}
+
+	return strings.Join(seq, "\n")
+}
+
+// Examples how to complete the task, gives the input/output pair
+type Example struct {
+	Input string `json:"input,omitempty"`
+	Reply string `json:"reply,omitempty"`
+}
+
+func (e Example) Kind() Kind { return EXAMPLE }
+
+func (e Example) String() string {
+	var sb strings.Builder
+	sb.WriteString("Example Input: ")
+	sb.WriteString(e.Input)
+	sb.WriteString("\n")
+	sb.WriteString("Expected Output: ")
+	sb.WriteString(e.Reply)
+
+	return sb.String()
+}
+
+// Guide LLM on how to complete the task.
+//
+//	prompt.With(
+//		chatter.Guide(...)
+//	)
+func Guide(note string, text ...string) Snippet {
+	s := Snippet{Type: TEXT, Note: sentence(note, "."), Text: make([]string, len(text))}
+	for i, t := range text {
+		s.Text[i] = Sentence(t)
+	}
+	return s
 }
 
 // Requirements is all about giving as much information as possible to ensure
 // your response does not use any incorrect assumptions.
-func (prompt *Prompt) WithRequirements(note string) *Prompt {
-	if prompt.Requirements == nil {
-		prompt.Requirements = &Remark{Note: "", Text: []string{}}
+//
+//	prompt.With(
+//		chatter.Rules(...)
+//	)
+func Rules(note string, text ...string) Snippet {
+	s := Snippet{Type: RULES, Note: sentence(note, ":"), Text: make([]string, len(text))}
+	for i, t := range text {
+		s.Text[i] = Sentence(t)
 	}
-
-	prompt.Requirements.Note = strings.TrimSpace(note)
-	return prompt
+	return s
 }
 
-// Requirements is all about giving as much information as possible to ensure
-// your response does not use any incorrect assumptions.
-func (prompt *Prompt) WithRequirement(req string, args ...any) *Prompt {
-	if prompt.Requirements == nil {
-		prompt.Requirements = &Remark{Note: "", Text: []string{}}
+// Give the feedback to LLM on previous completion of the task.
+//
+//	prompt.With(
+//		chatter.Feedback(...)
+//	)
+func Feedback(note string, text ...string) Snippet {
+	s := Snippet{Type: FEEDBACK, Note: sentence(note, ":"), Text: make([]string, len(text))}
+	for i, t := range text {
+		s.Text[i] = Sentence(t)
 	}
-
-	prompt.Requirements.Text = append(prompt.Requirements.Text,
-		fmt.Sprintf(strings.TrimSpace(req), args...),
-	)
-	return prompt
-}
-
-// Define the example of expected task
-func (prompt *Prompt) WithExample(input, output string) *Prompt {
-	if prompt.Examples == nil {
-		prompt.Examples = []Example{}
-	}
-
-	prompt.Examples = append(prompt.Examples, Example{Input: input, Output: output})
-	return prompt
-}
-
-// Input data required to complete the task.
-func (prompt *Prompt) WithInput(about string, input []string) *Prompt {
-	prompt.Input = &Remark{
-		Note: strings.TrimSuffix(strings.TrimSpace(about), ":"),
-		Text: input,
-	}
-
-	return prompt
+	return s
 }
 
 // Additional information required to complete the task.
-func (prompt *Prompt) WithContext(about string, context []string) *Prompt {
-	prompt.Context = &Remark{
-		Note: strings.TrimSuffix(strings.TrimSpace(about), ":"),
-		Text: context,
-	}
-
-	return prompt
+//
+//	prompt.With(
+//		chatter.Context(...)
+//	)
+func Context(note string, text ...string) Snippet {
+	return Snippet{Type: CONTEXT, Note: sentence(note, ":"), Text: text}
 }
 
-// Marshal prompt into text
-func (prompt Prompt) MarshalText() (text []byte, err error) {
-	var sb strings.Builder
-
-	if len(prompt.Role) > 0 {
-		sb.WriteString(prompt.Role)
-		sb.WriteString(". ")
-	}
-
-	if len(prompt.Task) > 0 {
-		sb.WriteString(asSingleLine(prompt.Task))
-		sb.WriteString(". ")
-	}
-
-	prompt.pp(&sb, prompt.Instructions)
-	prompt.ol(&sb, prompt.Requirements)
-
-	if len(prompt.Examples) > 0 {
-		sb.WriteString("Example")
-		if len(prompt.Examples) == 1 {
-			sb.WriteString("\n")
-		} else {
-			sb.WriteString("s\n")
-		}
-
-		for _, ex := range prompt.Examples {
-			sb.WriteString("Input: ")
-			sb.WriteString(ex.Input)
-			sb.WriteString("\n")
-			sb.WriteString("Output: ")
-			sb.WriteString(ex.Output)
-			sb.WriteString("\n")
-		}
-	}
-
-	prompt.ul(&sb, prompt.Input)
-	prompt.ul(&sb, prompt.Context)
-
-	s := strings.TrimSpace(sb.String())
-	return []byte(s), nil
+// Input data required to complete the task.
+//
+//	prompt.With(
+//		chatter.Input(...)
+//	)
+func Input(note string, text ...string) Snippet {
+	return Snippet{Type: INPUT, Note: sentence(note, ":"), Text: text}
 }
 
-// write remark as sequence of sentences
-func (prompt Prompt) pp(sb *strings.Builder, remark *Remark) {
-	if remark == nil || len(remark.Text) == 0 {
-		return
-	}
+// Ground level constrain of the model behavior.
+// The latin meaning "something that has been laid down".
+// Think about it as a cornerstone of the model behavior.
+// "Act as <role>" ...
+// Setting a specific role for a given prompt increases the likelihood of
+// more accurate information, when done appropriately.
+type Stratum string
 
-	if len(remark.Text) == 1 {
-		sb.WriteString(strings.TrimSuffix(asSingleLine(remark.Text[0]), "."))
-		sb.WriteString(". ")
-		return
-	}
+func (s Stratum) String() string { return string(s) }
 
-	for _, t := range remark.Text {
-		sb.WriteString(strings.TrimSuffix(asSingleLine(t), "."))
-		sb.WriteString(". ")
-	}
-}
+//------------------------------------------------------------------------------
 
-// write remark as unordered list
-func (prompt Prompt) ul(sb *strings.Builder, remark *Remark) {
-	if remark == nil || len(remark.Text) == 0 {
-		return
-	}
-
-	if len(remark.Text) == 1 {
-		sb.WriteString(asSingleLine(remark.Text[0]))
-		sb.WriteString("\n")
-		return
-	}
-
-	sb.WriteString("\n")
-	sb.WriteString(asSingleLine(remark.Note))
-	sb.WriteString("\n")
-
-	for _, t := range remark.Text {
-		sb.WriteString("* ")
-		sb.WriteString(asSingleLine(t))
-		sb.WriteString("\n")
-	}
-}
-
-// write remark as ordered list
-func (prompt Prompt) ol(sb *strings.Builder, remark *Remark) {
-	if remark == nil || len(remark.Text) == 0 {
-		return
-	}
-
-	if len(remark.Text) == 1 {
-		sb.WriteString(asSingleLine(remark.Text[0]))
-		sb.WriteString("\n")
-		return
-	}
-
-	sb.WriteString("\n")
-	sb.WriteString(asSingleLine(remark.Note))
-	sb.WriteString("\n")
-
-	for i, t := range remark.Text {
-		sb.WriteString(strconv.Itoa(i + 1))
-		sb.WriteString(". ")
-		sb.WriteString(asSingleLine(t))
-		sb.WriteString("\n")
-	}
-}
+// Helper function for making completition of sentences/pharses.
+func Sentence(s string) string { return sentence(s, ".") }
 
 var reSingleLine = regexp.MustCompile("[\r\n\t ]+")
 
-func asSingleLine(s string) string {
-	return reSingleLine.ReplaceAllString(s, " ")
+const punctuations = ".:;,!?"
+
+func sentence(s, dot string) string {
+	s = reSingleLine.ReplaceAllString(s, " ")
+	s = strings.TrimSpace(s)
+	if len(s) == 0 {
+		return ""
+	}
+
+	c := s[len(s)-1]
+	if !strings.ContainsRune(punctuations, rune(c)) {
+		s = s + dot
+	}
+
+	return s
+}
+
+//------------------------------------------------------------------------------
+
+// Converts prompt to string
+func (prompt Prompt) String() string {
+	var pb builder
+	// {task}. {guide}.
+	pb.text(&prompt)
+
+	// 1. {rule}
+	// 2. ...
+	pb.unit(&prompt, RULES)
+
+	// {feedback}
+	pb.unit(&prompt, FEEDBACK)
+
+	// Example Input: {input}
+	// Expected Output: {output}
+	pb.join(&prompt, EXAMPLE)
+
+	// {about context}
+	// - {context}
+	// - {context}
+	// - ...
+	pb.join(&prompt, CONTEXT)
+
+	//	{about input}:
+	//	- {input}
+	//	- {input}
+	//	- ...
+	//
+	pb.unit(&prompt, INPUT)
+
+	return pb.String()
+}
+
+type builder struct{ seq []string }
+
+func (b *builder) text(prompt *Prompt) {
+	if b.seq == nil {
+		b.seq = make([]string, 0)
+	}
+
+	var seq = make([]string, 0)
+	if len(prompt.Task) != 0 {
+		seq = append(seq, prompt.Task)
+	}
+	for _, t := range prompt.Sections {
+		if t.Kind() == TEXT {
+			seq = append(seq, t.String())
+		}
+	}
+
+	txt := strings.Join(seq, " ")
+	if len(txt) > 0 {
+		b.seq = append(b.seq, txt)
+	}
+}
+
+func (b *builder) unit(prompt *Prompt, kind Kind) {
+	if b.seq == nil {
+		b.seq = make([]string, 0)
+	}
+
+	var req string
+	for _, t := range prompt.Sections {
+		if t.Kind() == kind {
+			if r, ok := t.(Snippet); ok {
+				if len(req) != 0 {
+					r.Note = ""
+				} else {
+					req = r.Note
+				}
+				b.seq = append(b.seq, r.String())
+			} else {
+				b.seq = append(b.seq, t.String())
+			}
+		}
+	}
+}
+
+func (b *builder) join(prompt *Prompt, kind Kind) {
+	if b.seq == nil {
+		b.seq = make([]string, 0)
+	}
+
+	for _, t := range prompt.Sections {
+		if t.Kind() == kind {
+			b.seq = append(b.seq, t.String())
+		}
+	}
+}
+
+func (b *builder) String() string {
+	return strings.Join(b.seq, "\n\n")
 }

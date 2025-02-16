@@ -15,80 +15,80 @@ import (
 	"github.com/fogfish/it/v2"
 )
 
-func TestPromptWithRole(t *testing.T) {
-	v := "assistant"
-	p := &Prompt{}
-	p.WithRole(v)
-	txt, _ := p.MarshalText()
+// func TestPromptWithRole(t *testing.T) {
+// 	v := "assistant"
+// 	p := &Prompt{}
+// 	p.WithRole(v)
+// 	txt, _ := p.MarshalText()
 
-	it.Then(t).Should(
-		it.Equal(p.Role, v),
-		it.Equal(string(txt), v+"."),
-	)
-}
+// 	it.Then(t).Should(
+// 		it.Equal(p.Role, v),
+// 		it.Equal(string(txt), v+"."),
+// 	)
+// }
 
 func TestPromptWithTask(t *testing.T) {
 	v := "Translate the following text"
+	e := v + "."
+
 	p := &Prompt{}
 	p.WithTask(v)
-	txt, _ := p.MarshalText()
 
 	it.Then(t).Should(
-		it.Equal(p.Task, v),
-		it.Equal(string(txt), v+"."),
+		it.Equal(p.Task, e),
+		it.Equal(p.String(), e),
 	)
 }
 
-func TestPromptWithInstruction(t *testing.T) {
+func TestPromptWithGuide(t *testing.T) {
 	v := "Use formal language"
+	e := v + "."
+
 	p := &Prompt{}
-	p.WithInstruction(v)
-	txt, _ := p.MarshalText()
+	p.With(Guide("", v))
 
 	it.Then(t).Should(
-		it.Seq(p.Instructions.Text).Equal(v),
-		it.Equal(string(txt), v+"."),
+		it.Seq(p.Sections).Equal(Snippet{Type: TEXT, Note: "", Text: []string{e}}),
+		it.Equal(p.String(), e),
 	)
 }
 
-func TestPromptWithRequirements(t *testing.T) {
+func TestPromptWithRules1(t *testing.T) {
 	v := "Ensure accuracy"
+	e := "1. " + v + "."
+
 	p := &Prompt{}
-	p.WithRequirements(v)
-	txt, _ := p.MarshalText()
+	p.With(Rules("", v))
 
 	it.Then(t).Should(
-		it.Equal(p.Requirements.Note, v),
-		it.Equal(string(txt), ""),
+		it.Seq(p.Sections).Equal(Snippet{Type: RULES, Note: "", Text: []string{v + "."}}),
+		it.Equal(p.String(), e),
 	)
 }
 
-func TestPrompt_WithRequirement(t *testing.T) {
+func TestPromptWithRules2(t *testing.T) {
 	v := "Ensure accuracy"
 	y := "Translate all text"
+
 	p := &Prompt{}
-	p.WithRequirements(v)
-	p.WithRequirement(y)
-	p.WithRequirement(y)
-	txt, _ := p.MarshalText()
+	p.With(Rules(v, y, y))
 
 	it.Then(t).Should(
-		it.Equal(p.Requirements.Note, v),
-		it.Seq(p.Requirements.Text).Equal(y, y),
-		it.Equal(string(txt), fmt.Sprintf("%s\n1. %s\n2. %s", v, y, y)),
+		it.Seq(p.Sections).Equal(Snippet{Type: RULES, Note: v + ":", Text: []string{y + ".", y + "."}}),
+		it.Equal(p.String(), fmt.Sprintf("%s:\n1. %s.\n2. %s.", v, y, y)),
 	)
 }
 
 func TestPromptWithExample(t *testing.T) {
 	v := "Hello"
 	y := "Hola"
+
 	p := &Prompt{}
-	p.WithExample(v, y)
-	txt, _ := p.MarshalText()
+	p.With(Example{Input: v, Reply: y})
 
 	it.Then(t).Should(
-		it.Seq(p.Examples).Equal(Example{Input: v, Output: y}),
-		it.Equal(string(txt), fmt.Sprintf("Example\nInput: %s\nOutput: %s", v, y)),
+		it.Seq(p.Sections).Equal(Example{Input: v, Reply: y}),
+		it.Equal(p.String(), fmt.Sprintf("Example Input: %s\nExpected Output: %s", v, y)),
 	)
 }
 
@@ -96,13 +96,13 @@ func TestPromptWithInput(t *testing.T) {
 	a := "Translate the following"
 	h := "Hello"
 	w := "World"
+
 	p := &Prompt{}
-	p.WithInput(a, []string{h, w})
-	txt, _ := p.MarshalText()
+	p.With(Input(a, h, w))
 
 	it.Then(t).Should(
-		it.Seq(p.Input.Text).Equal(h, w),
-		it.Equal(string(txt), fmt.Sprintf("%s\n* %s\n* %s", a, h, w)),
+		it.Seq(p.Sections).Equal(Snippet{Type: INPUT, Note: a + ":", Text: []string{h, w}}),
+		it.Equal(p.String(), fmt.Sprintf("%s:\n- %s.\n- %s.", a, h, w)),
 	)
 }
 
@@ -110,12 +110,26 @@ func TestPromptWithContext(t *testing.T) {
 	a := "Context information"
 	h := "Hello"
 	w := "World"
+
 	p := &Prompt{}
-	p.WithContext(a, []string{h, w})
-	txt, _ := p.MarshalText()
+	p.With(Context(a, h, w))
 
 	it.Then(t).Should(
-		it.Seq(p.Context.Text).Equal(h, w),
-		it.Equal(string(txt), fmt.Sprintf("%s\n* %s\n* %s", a, h, w)),
+		it.Seq(p.Sections).Equal(Snippet{Type: CONTEXT, Note: a + ":", Text: []string{h, w}}),
+		it.Equal(p.String(), fmt.Sprintf("%s:\n- %s.\n- %s.", a, h, w)),
+	)
+}
+
+func TestPromptWithFeedback(t *testing.T) {
+	a := "Context information"
+	h := "Hello"
+	w := "World"
+
+	p := &Prompt{}
+	p.With(Feedback(a, h, w))
+
+	it.Then(t).Should(
+		it.Seq(p.Sections).Equal(Snippet{Type: FEEDBACK, Note: a + ":", Text: []string{h + ".", w + "."}}),
+		it.Equal(p.String(), fmt.Sprintf("%s:\n- %s.\n- %s.", a, h, w)),
 	)
 }

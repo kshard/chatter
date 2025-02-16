@@ -1,11 +1,12 @@
 package bedrock
 
 import (
-	"encoding"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/kshard/chatter"
+	"github.com/kshard/chatter/encoding/llama3"
 )
 
 // Meta Llama3 model family
@@ -16,7 +17,7 @@ import (
 // * https://www.llama.com/docs/model-cards-and-prompt-formats/meta-llama-3/
 type Llama3 string
 
-var _ chatter.LLM = Llama2("")
+var _ chatter.LLM = Llama3("")
 
 // See model id
 // https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html#model-ids-arns
@@ -34,15 +35,40 @@ const (
 
 func (v Llama3) ModelID() string { return string(v) }
 
-func (v Llama3) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
-	txt, err := prompt.MarshalText()
-	if err != nil {
-		return nil, err
+func (v Llama3) Encode(prompt []fmt.Stringer, opts *chatter.Options) (req []byte, err error) {
+	if len(prompt) == 0 {
+		err = fmt.Errorf("bad request, empty prompt")
+		return
 	}
 
-	req, err := json.Marshal(
+	var (
+		codec interface{ Write(s string) error }
+		ptext strings.Builder
+	)
+	switch v := prompt[0].(type) {
+	case chatter.Stratum:
+		codec, err = llama3.NewEncoder(&ptext, v.String())
+		if err != nil {
+			return
+		}
+		prompt = prompt[1:]
+	default:
+		codec, err = llama3.NewEncoder(&ptext, "")
+		if err != nil {
+			return
+		}
+	}
+
+	for _, p := range prompt {
+		err = codec.Write(p.String())
+		if err != nil {
+			return
+		}
+	}
+
+	req, err = json.Marshal(
 		llamaInquery{
-			Prompt:      v.encode(txt),
+			Prompt:      ptext.String(),
 			Temperature: opts.Temperature,
 			TopP:        opts.TopP,
 			MaxTokens:   opts.Quota,
@@ -55,18 +81,6 @@ func (v Llama3) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]
 	return req, nil
 }
 
-func (Llama3) encode(prompt []byte) string {
-	var sb strings.Builder
-
-	sb.WriteString("<|begin_of_text|>\n")
-	sb.WriteString("<|start_header_id|>user<|end_header_id|>\n")
-	sb.Write(prompt)
-	sb.WriteString("<|eot_id|>\n")
-	sb.WriteString("<|start_header_id|>assistant<|end_header_id|>\n")
-
-	return sb.String()
-}
-
 func (Llama3) Decode(data []byte) (r chatter.Reply, err error) {
 	var reply llamaChatter
 
@@ -75,9 +89,23 @@ func (Llama3) Decode(data []byte) (r chatter.Reply, err error) {
 		return
 	}
 
-	r.Text = reply.Text
+	r.Text = chatter.Text(reply.Text)
 	r.UsedInputTokens = reply.UsedPromptTokens
 	r.UsedReplyTokens = reply.UsedTextTokens
 
 	return
+}
+
+type llamaInquery struct {
+	Prompt      string  `json:"prompt"`
+	Temperature float64 `json:"temperature,omitempty"`
+	TopP        float64 `json:"top_p,omitempty"`
+	MaxTokens   int     `json:"max_gen_len,omitempty"`
+}
+
+type llamaChatter struct {
+	Text             string `json:"generation"`
+	UsedPromptTokens int    `json:"prompt_token_count"`
+	UsedTextTokens   int    `json:"generation_token_count"`
+	StopReason       string `json:"stop_reason"`
 }

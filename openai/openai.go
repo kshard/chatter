@@ -10,8 +10,8 @@ package openai
 
 import (
 	"context"
-	"encoding"
 	"errors"
+	"fmt"
 
 	"github.com/kshard/chatter"
 
@@ -50,10 +50,9 @@ func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
 func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Send prompt
-func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts ...func(*chatter.Options)) (string, error) {
-	txt, err := prompt.MarshalText()
-	if err != nil {
-		return "", err
+func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...func(*chatter.Options)) (chatter.Text, error) {
+	if len(prompt) == 0 {
+		return "", fmt.Errorf("bad request, empty prompt")
 	}
 
 	opt := chatter.NewOptions()
@@ -61,8 +60,19 @@ func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts
 		o(&opt)
 	}
 
-	seq := []message{
-		{Role: "user", Content: string(txt)},
+	seq := make([]message, 0)
+	switch v := prompt[0].(type) {
+	case chatter.Stratum:
+		seq = append(seq, message{Role: "developer", Content: string(v)})
+		prompt = prompt[1:]
+	}
+
+	for i, msg := range prompt {
+		if i%2 == 0 {
+			seq = append(seq, message{Role: "user", Content: msg.String()})
+		} else {
+			seq = append(seq, message{Role: "assistant", Content: msg.String()})
+		}
 	}
 
 	bag, err := http.IO[modelChatter](c.WithContext(ctx),
@@ -94,5 +104,5 @@ func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts
 		return "", errors.New("empty response")
 	}
 
-	return bag.Choices[0].Message.Content, nil
+	return chatter.Text(bag.Choices[0].Message.Content), nil
 }

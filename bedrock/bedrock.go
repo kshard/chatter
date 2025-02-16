@@ -10,12 +10,13 @@ package bedrock
 
 import (
 	"context"
-	"encoding"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/fogfish/opts"
 	"github.com/kshard/chatter"
+	// "github.com/kshard/chatter/encoding/llama3"
 )
 
 // AWS Bedrock client
@@ -51,7 +52,7 @@ func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
 func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Prompt the model
-func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts ...func(*chatter.Options)) (string, error) {
+func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...func(*chatter.Options)) (chatter.Text, error) {
 	opt := chatter.NewOptions()
 	for _, o := range opts {
 		o(&opt)

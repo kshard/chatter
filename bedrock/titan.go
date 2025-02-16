@@ -9,11 +9,12 @@
 package bedrock
 
 import (
-	"encoding"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/kshard/chatter"
+	"github.com/kshard/chatter/encoding/text"
 )
 
 // Amazon Titan Text model family
@@ -33,15 +34,40 @@ const (
 
 func (v Titan) ModelID() string { return string(v) }
 
-func (Titan) Encode(prompt encoding.TextMarshaler, opts *chatter.Options) ([]byte, error) {
-	txt, err := prompt.MarshalText()
-	if err != nil {
-		return nil, err
+func (Titan) Encode(prompt []fmt.Stringer, opts *chatter.Options) (req []byte, err error) {
+	if len(prompt) == 0 {
+		err = fmt.Errorf("bad request, empty prompt")
+		return
 	}
 
-	req, err := json.Marshal(
+	var (
+		codec interface{ Write(s string) error }
+		ptext strings.Builder
+	)
+	switch v := prompt[0].(type) {
+	case chatter.Stratum:
+		codec, err = text.NewEncoder(&ptext, "Bot: ", "User: ", "Your role "+v.String())
+		if err != nil {
+			return
+		}
+		prompt = prompt[1:]
+	default:
+		codec, err = text.NewEncoder(&ptext, "Bot: ", "User: ", "")
+		if err != nil {
+			return
+		}
+	}
+
+	for _, p := range prompt {
+		err = codec.Write(p.String())
+		if err != nil {
+			return
+		}
+	}
+
+	req, err = json.Marshal(
 		titanInquery{
-			Prompt: string(txt),
+			Prompt: ptext.String(),
 			Config: titanInqueryConfig{
 				Temperature: opts.Temperature,
 				TopP:        opts.TopP,
@@ -72,7 +98,7 @@ func (Titan) Decode(data []byte) (r chatter.Reply, err error) {
 		sb.WriteRune('\n')
 		r.UsedReplyTokens += text.UsedTextTokens
 	}
-	r.Text = sb.String()
+	r.Text = chatter.Text(sb.String())
 
 	return
 }

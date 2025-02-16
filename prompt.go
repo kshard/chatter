@@ -22,7 +22,7 @@ import (
 // enabling efficient serialization into the textual prompt (aiming for quality).
 // At the glance the prompt is structured:
 //
-//	 {task}.
+//	 {task}. {guidelines}.
 //		1. {requirements}
 //		2. ...
 //	 {feedback}

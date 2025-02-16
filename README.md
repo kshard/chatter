@@ -98,7 +98,7 @@ The library addresses the LLMs comparisons by
 
 ```go
 type Chatter interface {
-	Prompt(context.Context, encoding.TextMarshaler, ...func(*Options)) (string, error)
+	Prompt(context.Context, []fmt.Stringer, ...func(*Options)) (string, error)
 }
 ```
 
@@ -128,7 +128,7 @@ func main() {
 	var prompt chatter.Prompt
 	prompt.WithTask("Extract keywords from the text: %s", /* ... */)
 
-	reply, err := assistant.Prompt(context.Background(), &prompt)
+	reply, err := assistant.Prompt(context.Background(), prompt.ToSeq())
 	if err != nil {
 		panic(err)
 	}
@@ -136,6 +136,69 @@ func main() {
 	fmt.Printf("==> (%d)\n%s\n", assistant.ConsumedTokens(), reply)
 }
 ```
+
+## Prompt
+
+Package `chatter` provides utilities for creating and managing structured prompts for language models.
+
+The Prompt type allows you to create a structured prompt with various sections such as **task**, **rules**, **feedback**, **examples**, **context**, and **input**. This helps in maintaining semi-structured prompts while enabling efficient serialization into textual prompts.
+
+```
+{task}. {guidelines}.
+1. {requirements}
+2. {requirements}
+3. ...
+{feedback}
+{examples}
+{context}
+{context}
+...
+{input}
+```
+
+Example usage:
+
+```go
+var prompt chatter.Prompt{}
+
+prompt.WithTask("Translate the following text")
+
+// Creates a guide section with the given note and text.
+// It is complementary paragraph to the task.
+prompt.With(chatter.Guide("Please translate the text accurately"))
+
+// Creates a rules / requirements section with the given note and text.
+prompt.With(chatter.Rules(
+  "Strictly adhere to the following requirements when generating a response.",
+  "Do not use any slang or informal language",
+  "Do not invent new, unkown words",
+))
+
+// Creates a feedback section with the given note and text.
+prompt.With(chatter.Feedback(
+  "Improve the response based on feedback",
+  "Previous translations were too literal.",
+))
+
+// Create example of input and expected output.
+prompt.With(chatter.Example{
+  Input: `["Hello"]`,
+  Reply: `["Hola"]`
+})
+
+// Creates a context section with the given note and text.
+prompt.With(chatter.Context(
+  "Below are additional context relevant to your goal task.",
+  "The text is a formal letter",
+))
+
+// Creates an input section with the given note and text.
+prompt.With(chatter.Input(
+  "Translate the following sentence",
+  "Hello, how are you?",
+))
+```
+
 
 ## How To Contribute
 

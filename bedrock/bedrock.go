@@ -16,7 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/fogfish/opts"
 	"github.com/kshard/chatter"
-	// "github.com/kshard/chatter/encoding/llama3"
 )
 
 // AWS Bedrock client

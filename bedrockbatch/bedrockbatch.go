@@ -10,7 +10,6 @@ package bedrockbatch
 
 import (
 	"context"
-	"encoding"
 	"encoding/json"
 	"fmt"
 	"path/filepath"
@@ -77,7 +76,7 @@ func (c *Client) Prepare() (*Job, error) {
 				S3Uri: aws.String(reply),
 			},
 		},
-		ModelId: aws.String(c.llm.ID()),
+		ModelId: aws.String(c.llm.ModelID()),
 		JobName: aws.String(u),
 	}
 
@@ -113,9 +112,9 @@ func (w *writer) UsedReplyTokens() int { return 0 }
 
 func (w *writer) Prompt(
 	ctx context.Context,
-	prompt encoding.TextMarshaler,
+	prompt []fmt.Stringer,
 	opts ...func(*chatter.Options),
-) (string, error) {
+) (chatter.Text, error) {
 	if w.codec == nil {
 		return "", fmt.Errorf("job is closed, unable to prompt")
 	}

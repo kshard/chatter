@@ -42,20 +42,31 @@ func main() {
 
 	var prompt chatter.Prompt
 	prompt.WithTask("Extract keywords from the input text.")
-	prompt.WithRequirement("Rank and order keywords according to the relevance.")
-	prompt.WithRequirement("Return empty list if text is short or no way to extract keywords with high confidence.")
-	prompt.WithRequirement("Replacing pronouns (e.g., it, he, she, they, this, that) with the full name of the entities they refer to.")
-	prompt.WithRequirement("Present the results as a list of strings, formatted in JSON. Do not output any explanations.")
-	prompt.WithExample(
-		`the heat in the street was terrible: and the airlessness, the bustle and the plaster, scaffolding, bricks, and dust all about him, and that special petersburg stench, so familiar to all who are unable to get out of town in summer--all worked painfully upon the young man’s already overwrought nerves.`,
-		`[ "overwrought nerves", "Petersburg", "heat", "airlessness", "dust", "bustle", "scaffolding", "summer", "bricks", "plaster", "street", "young man" ]`,
+	prompt.With(
+		chatter.Rules(
+			`Strictly adhere to the following requirements when generating a response.
+			Do not deviate, ignore, or modify any aspect of them:`,
+
+			"Rank and order keywords according to the relevance.",
+			"Return empty list if text is short or no way to extract keywords with high confidence.",
+			"Replacing pronouns (e.g., it, he, she, they, this, that) with the full name of the entities they refer to.",
+			"Present the results as a list of strings, formatted in JSON. Do not output any explanations.",
+		),
+	)
+	prompt.With(
+		chatter.Example{
+			Input: `the heat in the street was terrible: and the airlessness, the bustle and the plaster, scaffolding, bricks, and dust all about him, and that special petersburg stench, so familiar to all who are unable to get out of town in summer--all worked painfully upon the young man’s already overwrought nerves.`,
+			Reply: `[ "overwrought nerves", "Petersburg", "heat", "airlessness", "dust", "bustle", "scaffolding", "summer", "bricks", "plaster", "street", "young man" ]`,
+		},
 	)
 
 	scanner := bufio.NewScanner(input)
 	for scanner.Scan() {
-		prompt.WithInput("Input text:", []string{scanner.Text()})
+		prompt.With(
+			chatter.Input("Input text:", scanner.Text()),
+		)
 
-		_, err := job.Prompt(context.Background(), &prompt)
+		_, err := job.Prompt(context.Background(), prompt.ToSeq())
 		if err != nil {
 			panic(err)
 		}

@@ -87,7 +87,7 @@ func (api *service) httpPrompt(w http.ResponseWriter, r *http.Request) {
 		chatter = api.routes["_"]
 	}
 
-	reply, err := chatter.Prompt(context.Background(), prompt)
+	reply, err := chatter.Prompt(context.Background(), prompt.ToSeq())
 	if err != nil {
 		json.NewEncoder(w).Encode(err.Error())
 		return

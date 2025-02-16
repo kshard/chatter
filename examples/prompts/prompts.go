@@ -68,19 +68,15 @@ func main() {
 		var sb strings.Builder
 		sb.WriteString(fmt.Sprintf("## Level: %d\n", i))
 		sb.WriteString("### Question\n")
-		txt, err := prompt.MarshalText()
-		if err != nil {
-			panic(err)
-		}
-		sb.Write(txt)
+		sb.WriteString(prompt.String())
 		sb.WriteString("\n")
 
-		reply, err := assistant.Prompt(context.Background(), &prompt)
+		reply, err := assistant.Prompt(context.Background(), prompt.ToSeq())
 		if err != nil {
 			panic(err)
 		}
 		sb.WriteString("### Answer\n\n")
-		sb.WriteString(reply)
+		sb.WriteString(reply.String())
 		sb.WriteString("\n\n")
 
 		fmt.Println(sb.String())
@@ -88,13 +84,13 @@ func main() {
 }
 
 func level0() (prompt chatter.Prompt) {
-	prompt.WithInput("", review)
+	prompt.With(chatter.Input("", review...))
 	return
 }
 
 func level1() (prompt chatter.Prompt) {
 	prompt.WithTask("Prepare a review by summarizing the reviewer comments.")
-	prompt.WithInput("", review)
+	prompt.With(chatter.Input("", review...))
 	return
 }
 
@@ -105,7 +101,10 @@ func level2() (prompt chatter.Prompt) {
 		common strengths/weaknesses mentioned by multiple reviewers, suggestions
 		for improvement.
 	`)
-	prompt.WithInput("The text for review is below:", review)
+
+	prompt.With(
+		chatter.Input("The text for review is below:", review...),
+	)
 	return
 }
 
@@ -115,62 +114,68 @@ func level3() (prompt chatter.Prompt) {
 		comments.
 	`)
 
-	prompt.WithRequirement(`
-		Based on the reviewer's comments, what are the core contributions made
-		by the technology?
-	`)
-	prompt.WithRequirement(`
-		What are the common strengths of this technology, as mentioned by
-		multiple reviewers?
-	`)
-	prompt.WithRequirement(`
-		What are the common weaknesses of this technology, as highlighted by
-		multiple reviewers?
-	`)
-	prompt.WithRequirement(`
-		What suggestions would you provide for improving this technology?
-	`)
+	prompt.With(chatter.Rules("",
+		`Based on the reviewer's comments, what are the core contributions made
+		by the technology?`,
 
-	prompt.WithInput("The review texts are below:", review)
+		`What are the common strengths of this technology, as mentioned by
+		multiple reviewers?`,
+
+		`What are the common weaknesses of this technology, as highlighted by
+		multiple reviewers?`,
+
+		`What suggestions would you provide for improving this technology?`,
+	))
+
+	prompt.With(
+		chatter.Input("The text for review is below:", review...),
+	)
+
 	return
 }
 
 func level4() (prompt chatter.Prompt) {
 	prompt = level3()
 
-	prompt.WithInstruction(`
-		An output should highlight major strengths and issues mentioned by multiple
-		reviewers, be less than 400 words in length, the response should be
-		in English only.
-	`)
+	prompt.With(
+		chatter.Guide(`
+			An output should highlight major strengths and issues mentioned by multiple
+			reviewers, be less than 400 words in length, the response should be
+			in English only.
+		`),
+	)
 	return
 }
 
 func level5() (prompt chatter.Prompt) {
 	prompt = level4()
 
-	prompt.WithInstruction(`
-		Use additional context to answer given questions.
-	`)
+	prompt.With(
+		chatter.Guide(`Use additional context to answer given questions.`),
+	)
 
-	prompt.WithContext(
-		"Below are additional context relevant to your goal task.",
-		[]string{
+	prompt.With(
+		chatter.Context(
+			"Below are additional context relevant to your goal task.",
 			"the traditional data normalization techniques would not work with this database.",
 			"the overall data design is based on understanding access patterns.",
 			"the database is not designed for supporting SQL-like access.",
 			"the first step in designing your DynamoDB application is to identify the specific query patterns that the system must satisfy.",
-		},
+		),
 	)
+
 	return
 }
 
 func level6() (prompt chatter.Prompt) {
 	prompt = level5()
 
-	prompt.WithInstruction(`
-		Justify your response in detail by explaining why you made the choices
-		you actually made.
-	`)
+	prompt.With(
+		chatter.Guide(`
+			Justify your response in detail by explaining why you made the choices
+			you actually made.
+		`),
+	)
+
 	return
 }

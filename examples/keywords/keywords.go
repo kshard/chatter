@@ -27,7 +27,8 @@ func main() {
 	var prompt chatter.Prompt
 	prompt.WithTask("Extract keywords from the text: %s", text)
 
-	reply, err := assistant.Prompt(context.Background(), &prompt,
+	reply, err := assistant.Prompt(context.Background(),
+		prompt.ToSeq(),
 		chatter.WithTemperature(0.9),
 		chatter.WithQuota(512),
 	)

@@ -66,6 +66,7 @@ const (
 	EXAMPLE
 	CONTEXT
 	INPUT
+	BLOB
 )
 
 // Snippet is the sequence to statements annotated with note for the model.
@@ -89,6 +90,8 @@ func (r Snippet) String() string {
 		return r.toList()
 	case INPUT:
 		return r.toList()
+	case BLOB:
+		return r.toBlob()
 	default:
 		return r.toText()
 	}
@@ -105,6 +108,21 @@ func (r Snippet) toText() string {
 	}
 
 	return strings.Join(seq, " ")
+}
+
+// convert shapless structure, dump as a raw file
+func (r Snippet) toBlob() string {
+	var sb strings.Builder
+	if len(r.Note) > 0 {
+		sb.WriteString(sentence(r.Note, ":"))
+		sb.WriteString("\n")
+	}
+	for _, t := range r.Text {
+		sb.WriteString(t)
+		sb.WriteString("\n")
+	}
+
+	return sb.String()
 }
 
 // convert snippet to unordered list
@@ -210,6 +228,15 @@ func Input(note string, text ...string) Snippet {
 	return Snippet{Type: INPUT, Note: sentence(note, ":"), Text: text}
 }
 
+// Blob unformatted input data required to complete the task.
+//
+//	prompt.With(
+//		chatter.Blob(...)
+//	)
+func Blob(note string, text ...string) Snippet {
+	return Snippet{Type: BLOB, Note: sentence(note, ":"), Text: text}
+}
+
 // Ground level constrain of the model behavior.
 // The latin meaning "something that has been laid down".
 // Think about it as a cornerstone of the model behavior.
@@ -275,6 +302,7 @@ func (prompt Prompt) String() string {
 	//	- ...
 	//
 	pb.unit(&prompt, INPUT)
+	pb.join(&prompt, BLOB)
 
 	return pb.String()
 }

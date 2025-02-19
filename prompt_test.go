@@ -106,6 +106,20 @@ func TestPromptWithInput(t *testing.T) {
 	)
 }
 
+func TestPromptWithAttach(t *testing.T) {
+	a := "Translate the following"
+	h := "Hello"
+	w := "World"
+
+	p := &Prompt{}
+	p.With(Blob(a, h, w))
+
+	it.Then(t).Should(
+		it.Seq(p.Sections).Equal(Snippet{Type: BLOB, Note: a + ":", Text: []string{h, w}}),
+		it.Equal(p.String(), fmt.Sprintf("%s:\n%s\n%s\n", a, h, w)),
+	)
+}
+
 func TestPromptWithContext(t *testing.T) {
 	a := "Context information"
 	h := "Hello"

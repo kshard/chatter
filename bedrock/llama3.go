@@ -35,45 +35,51 @@ const (
 
 func (v Llama3) ModelID() string { return string(v) }
 
-func (v Llama3) Encode(prompt []fmt.Stringer, opts *chatter.Options) (req []byte, err error) {
+func (v Llama3) Encode(prompt []fmt.Stringer, opts ...chatter.Opt) (req []byte, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
 	}
 
-	var (
-		codec interface{ Write(s string) error }
-		ptext strings.Builder
-	)
-	switch v := prompt[0].(type) {
-	case chatter.Stratum:
-		codec, err = llama3.NewEncoder(&ptext, v.String())
-		if err != nil {
-			return
-		}
-		prompt = prompt[1:]
-	default:
-		codec, err = llama3.NewEncoder(&ptext, "")
-		if err != nil {
-			return
+	var ptext strings.Builder
+	codec, err := llama3.NewEncoder(&ptext)
+	if err != nil {
+		return
+	}
+
+	for _, term := range prompt {
+		switch v := term.(type) {
+		case chatter.Stratum:
+			err = codec.Stratum(string(v))
+			if err != nil {
+				return
+			}
+		case chatter.Reply:
+			err = codec.Reply(v.Text)
+			if err != nil {
+				return
+			}
+		default:
+			err = codec.Prompt(term.String())
+			if err != nil {
+				return
+			}
 		}
 	}
 
-	for _, p := range prompt {
-		err = codec.Write(p.String())
-		if err != nil {
-			return
+	inquery := llamaInquery{Prompt: ptext.String()}
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case chatter.Temperature:
+			inquery.Temperature = float64(v)
+		case chatter.TopP:
+			inquery.TopP = float64(v)
+		case chatter.Quota:
+			inquery.MaxTokens = int(v)
 		}
 	}
 
-	req, err = json.Marshal(
-		llamaInquery{
-			Prompt:      ptext.String(),
-			Temperature: opts.Temperature,
-			TopP:        opts.TopP,
-			MaxTokens:   opts.Quota,
-		},
-	)
+	req, err = json.Marshal(inquery)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +95,7 @@ func (Llama3) Decode(data []byte) (r chatter.Reply, err error) {
 		return
 	}
 
-	r.Text = chatter.Text(reply.Text)
+	r.Text = reply.Text
 	r.UsedInputTokens = reply.UsedPromptTokens
 	r.UsedReplyTokens = reply.UsedTextTokens
 

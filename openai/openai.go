@@ -50,28 +50,33 @@ func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
 func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Send prompt
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...func(*chatter.Options)) (chatter.Text, error) {
+func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (reply chatter.Reply, err error) {
 	if len(prompt) == 0 {
-		return "", fmt.Errorf("bad request, empty prompt")
-	}
-
-	opt := chatter.NewOptions()
-	for _, o := range opts {
-		o(&opt)
+		err = fmt.Errorf("bad request, empty prompt")
+		return
 	}
 
 	seq := make([]message, 0)
-	switch v := prompt[0].(type) {
-	case chatter.Stratum:
-		seq = append(seq, message{Role: "developer", Content: string(v)})
-		prompt = prompt[1:]
+	for _, term := range prompt {
+		switch v := term.(type) {
+		case chatter.Stratum:
+			seq = append(seq, message{Role: "developer", Content: string(v)})
+		case chatter.Reply:
+			seq = append(seq, message{Role: "assistant", Content: term.String()})
+		default:
+			seq = append(seq, message{Role: "user", Content: term.String()})
+		}
 	}
 
-	for i, msg := range prompt {
-		if i%2 == 0 {
-			seq = append(seq, message{Role: "user", Content: msg.String()})
-		} else {
-			seq = append(seq, message{Role: "assistant", Content: msg.String()})
+	inquery := modelInquery{Model: c.llm, Messages: seq}
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case chatter.Temperature:
+			inquery.Temperature = float64(v)
+		case chatter.TopP:
+			inquery.TopP = float64(v)
+		case chatter.Quota:
+			inquery.MaxTokens = int(v)
 		}
 	}
 
@@ -81,28 +86,29 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...func
 			ø.Accept.JSON,
 			ø.Authorization.Set("Bearer "+c.secret),
 			ø.ContentType.JSON,
-			ø.Send(modelInquery{
-				Model:       c.llm,
-				Messages:    seq,
-				MaxTokens:   opt.Quota,
-				Temperature: opt.Temperature,
-				TopP:        opt.TopP,
-			}),
+			ø.Send(inquery),
 
 			ƒ.Status.OK,
 			ƒ.ContentType.JSON,
 		),
 	)
 	if err != nil {
-		return "", err
+		return
 	}
 
 	c.usedInputTokens += bag.Usage.PromptTokens
 	c.usedReplyTokens += bag.Usage.OutputTokens
 
 	if len(bag.Choices) == 0 {
-		return "", errors.New("empty response")
+		err = errors.New("empty response")
+		return
 	}
 
-	return chatter.Text(bag.Choices[0].Message.Content), nil
+	reply = chatter.Reply{
+		Text:            bag.Choices[0].Message.Content,
+		UsedInputTokens: bag.Usage.PromptTokens,
+		UsedReplyTokens: bag.Usage.OutputTokens,
+	}
+
+	return
 }

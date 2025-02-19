@@ -34,47 +34,53 @@ const (
 
 func (v Titan) ModelID() string { return string(v) }
 
-func (Titan) Encode(prompt []fmt.Stringer, opts *chatter.Options) (req []byte, err error) {
+func (Titan) Encode(prompt []fmt.Stringer, opts ...chatter.Opt) (req []byte, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
 	}
 
-	var (
-		codec interface{ Write(s string) error }
-		ptext strings.Builder
-	)
-	switch v := prompt[0].(type) {
-	case chatter.Stratum:
-		codec, err = text.NewEncoder(&ptext, "Bot: ", "User: ", "Your role "+v.String())
-		if err != nil {
-			return
-		}
-		prompt = prompt[1:]
-	default:
-		codec, err = text.NewEncoder(&ptext, "Bot: ", "User: ", "")
-		if err != nil {
-			return
+	var ptext strings.Builder
+	codec, err := text.NewEncoder(&ptext, "Bot: ", "User: ")
+	if err != nil {
+		return
+	}
+
+	for _, term := range prompt {
+		switch v := term.(type) {
+		case chatter.Stratum:
+			err = codec.Stratum(string(v))
+			if err != nil {
+				return
+			}
+		case chatter.Reply:
+			err = codec.Reply(v.Text)
+			if err != nil {
+				return
+			}
+		default:
+			err = codec.Prompt(term.String())
+			if err != nil {
+				return
+			}
 		}
 	}
 
-	for _, p := range prompt {
-		err = codec.Write(p.String())
-		if err != nil {
-			return
+	inquery := titanInquery{Prompt: ptext.String()}
+	for _, opt := range opts {
+		switch v := opt.(type) {
+		case chatter.Temperature:
+			inquery.Config.Temperature = float64(v)
+		case chatter.TopP:
+			inquery.Config.TopP = float64(v)
+		case chatter.Quota:
+			inquery.Config.MaxTokens = int(v)
+		case chatter.StopSequence:
+			inquery.Config.StopSequence = []string{string(v)}
 		}
 	}
 
-	req, err = json.Marshal(
-		titanInquery{
-			Prompt: ptext.String(),
-			Config: titanInqueryConfig{
-				Temperature: opts.Temperature,
-				TopP:        opts.TopP,
-				MaxTokens:   opts.Quota,
-			},
-		},
-	)
+	req, err = json.Marshal(inquery)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +104,7 @@ func (Titan) Decode(data []byte) (r chatter.Reply, err error) {
 		sb.WriteRune('\n')
 		r.UsedReplyTokens += text.UsedTextTokens
 	}
-	r.Text = chatter.Text(sb.String())
+	r.Text = sb.String()
 
 	return
 }

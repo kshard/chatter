@@ -11,7 +11,7 @@ package cache_test
 import (
 	"bytes"
 	"context"
-	"encoding"
+	"fmt"
 	"testing"
 
 	"github.com/kshard/chatter"
@@ -25,11 +25,11 @@ func TestCache(t *testing.T) {
 	var prompt chatter.Prompt
 	prompt.WithTask("Make me a test.")
 
-	c.Prompt(context.Background(), prompt)
-	c.Prompt(context.Background(), prompt)
+	c.Prompt(context.Background(), prompt.ToSeq())
+	c.Prompt(context.Background(), prompt.ToSeq())
 
 	for k := range kv {
-		hkey, _ := c.HashKey(prompt)
+		hkey := c.HashKey(prompt.String())
 		if !bytes.Equal([]byte(k), hkey) {
 			t.Errorf("unexpected key")
 		}
@@ -42,8 +42,8 @@ type llm struct{}
 func (llm) UsedInputTokens() int { return 5 }
 func (llm) UsedReplyTokens() int { return 10 }
 
-func (llm) Prompt(context.Context, encoding.TextMarshaler, ...func(*chatter.Options)) (string, error) {
-	return "Looking for testing", nil
+func (llm) Prompt(context.Context, []fmt.Stringer, ...chatter.Opt) (chatter.Reply, error) {
+	return chatter.Reply{Text: "Looking for testing"}, nil
 }
 
 // mock key-value

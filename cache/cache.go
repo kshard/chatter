@@ -11,7 +11,7 @@ package cache
 import (
 	"context"
 	"crypto/sha1"
-	"encoding"
+	"fmt"
 	"log/slog"
 
 	"github.com/kshard/chatter"
@@ -31,38 +31,33 @@ func New(cache Cache, chatter chatter.Chatter) *Client {
 	}
 }
 
-func (c *Client) HashKey(prompt encoding.TextMarshaler) ([]byte, error) {
-	b, err := prompt.MarshalText()
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Client) HashKey(prompt string) []byte {
 	hash := sha1.New()
-	hash.Write(b)
-	return hash.Sum(nil), nil
+	hash.Write([]byte(prompt))
+	return hash.Sum(nil)
 }
 
-func (c *Client) Prompt(ctx context.Context, prompt encoding.TextMarshaler, opts ...func(*chatter.Options)) (string, error) {
-	hkey, err := c.HashKey(prompt)
-	if err != nil {
-		return "", err
+func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+	if len(prompt) == 0 {
+		return chatter.Reply{}, fmt.Errorf("bad request, empty prompt")
 	}
 
+	hkey := c.HashKey(prompt[len(prompt)-1].String())
 	val, err := c.cache.Get(hkey)
 	if err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
 	if len(val) != 0 {
-		return string(val), nil
+		return chatter.Reply{Text: string(val)}, nil
 	}
 
 	reply, err := c.Chatter.Prompt(ctx, prompt, opts...)
 	if err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
-	err = c.cache.Put(hkey, []byte(reply))
+	err = c.cache.Put(hkey, []byte(reply.Text))
 	if err != nil {
 		slog.Warn("failed to cache LLM reply", "err", err)
 	}

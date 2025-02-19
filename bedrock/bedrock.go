@@ -51,15 +51,10 @@ func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
 func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Prompt the model
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...func(*chatter.Options)) (chatter.Text, error) {
-	opt := chatter.NewOptions()
-	for _, o := range opts {
-		o(&opt)
-	}
-
-	req, err := c.llm.Encode(prompt, &opt)
+func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+	req, err := c.llm.Encode(prompt, opts...)
 	if err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
 	inquiry := &bedrockruntime.InvokeModelInput{
@@ -70,16 +65,16 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...func
 
 	result, err := c.api.InvokeModel(ctx, inquiry)
 	if err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
 	reply, err := c.llm.Decode(result.Body)
 	if err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
 	c.usedInputTokens += reply.UsedInputTokens
 	c.usedReplyTokens += reply.UsedReplyTokens
 
-	return reply.Text, nil
+	return reply, nil
 }

@@ -113,20 +113,15 @@ func (w *writer) UsedReplyTokens() int { return 0 }
 func (w *writer) Prompt(
 	ctx context.Context,
 	prompt []fmt.Stringer,
-	opts ...func(*chatter.Options),
-) (chatter.Text, error) {
+	opts ...chatter.Opt,
+) (chatter.Reply, error) {
 	if w.codec == nil {
-		return "", fmt.Errorf("job is closed, unable to prompt")
+		return chatter.Reply{}, fmt.Errorf("job is closed, unable to prompt")
 	}
 
-	opt := chatter.NewOptions()
-	for _, fopt := range opts {
-		fopt(&opt)
-	}
-
-	req, err := w.llm.Encode(prompt, &opt)
+	req, err := w.llm.Encode(prompt, opts...)
 	if err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
 	w.tUsed += int(float64(len(req)) / 4.5)
@@ -137,10 +132,10 @@ func (w *writer) Prompt(
 	}
 
 	if err := w.codec.Encode(&inquiry); err != nil {
-		return "", err
+		return chatter.Reply{}, err
 	}
 
-	return "", nil
+	return chatter.Reply{}, nil
 }
 
 func (w *writer) Cancel() error {

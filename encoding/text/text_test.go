@@ -19,13 +19,16 @@ import (
 func TestEncoder(t *testing.T) {
 	var sb strings.Builder
 
-	codec, err := text.NewEncoder(&sb, "Bot: ", "User: ", "Role")
+	codec, err := text.NewEncoder(&sb, "Bot: ", "User: ")
 	it.Then(t).Should(it.Nil(err))
 
-	err = codec.Write("request")
+	err = codec.Stratum("Role")
 	it.Then(t).Should(it.Nil(err))
 
-	err = codec.Write("response")
+	err = codec.Prompt("request")
+	it.Then(t).Should(it.Nil(err))
+
+	err = codec.Reply("response")
 	it.Then(t).Should(it.Nil(err))
 
 	it.Then(t).Should(

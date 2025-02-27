@@ -64,6 +64,16 @@
     <td>
       LLMs query/reply caching
     </td></tr>
+    <!-- Module LLMs pool  -->
+    <tr><td><a href=".">
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llms/*"/>
+    </a></td>
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llms">
+      <img src="https://img.shields.io/badge/doc-llms-007d9c?logo=go&logoColor=white&style=platic" />
+    </a></td>
+    <td>
+      Dynamic routing for LLMs instances
+    </td></tr>
 		<!-- Module openai -->
     <tr><td><a href=".">
       <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*"/>

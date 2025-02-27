@@ -8,4 +8,4 @@
 
 package llms
 
-const Version = "openai/v0.0.1"
+const Version = "llms/v0.0.1"

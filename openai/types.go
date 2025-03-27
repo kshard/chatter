@@ -57,6 +57,10 @@ var (
 
 	// Set api secret from ~/.netrc file
 	WithNetRC = opts.FMap(withNetRC)
+
+	// Config the system role, the default one is `system`.
+	// The role has been switch to `developer` on newer OpenAI LLMs
+	WithRoleSystem = opts.ForName[Client, string]("roleSystem")
 )
 
 func withNetRC(h *Client, host string) error {
@@ -88,6 +92,7 @@ type Client struct {
 	http.Stack
 	host            ø.Authority
 	secret          string
+	roleSystem      string
 	llm             LLM
 	usedInputTokens int
 	usedReplyTokens int

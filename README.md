@@ -82,7 +82,7 @@
       <img src="https://img.shields.io/badge/doc-openai-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>
-      OpenAI LLMs
+      OpenAI and compatible LLMs
     </td></tr>
 		</tbody>
 	</table>
@@ -145,6 +145,19 @@ func main() {
 
 	fmt.Printf("==> (%d)\n%s\n", assistant.ConsumedTokens(), reply)
 }
+```
+
+`openai` module is also enables consumption of OpenAI compatible interfaces (e.g. LM Studio). It only requires explicit configuration of the host where model is hosted.
+
+```go
+import (
+	"github.com/kshard/chatter/openai"
+)
+
+assistant, err := openai.New(
+  openai.WithHost("http://localhost:1234"),
+  openai.WithLLM(openai.LLM("gemma-3-27b-it")),
+)
 ```
 
 ## Prompt

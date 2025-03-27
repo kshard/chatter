@@ -33,7 +33,10 @@ import (
 //	WithModel(...)
 //	WithHTTP(opts ...http.Config)
 func New(opt ...Option) (*Client, error) {
-	api := Client{host: ø.Authority("https://api.openai.com")}
+	api := Client{
+		host:       ø.Authority("https://api.openai.com"),
+		roleSystem: "system",
+	}
 
 	if err := opts.Apply(&api, opt); err != nil {
 		return nil, err
@@ -60,7 +63,7 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 	for _, term := range prompt {
 		switch v := term.(type) {
 		case chatter.Stratum:
-			seq = append(seq, message{Role: "developer", Content: string(v)})
+			seq = append(seq, message{Role: c.roleSystem, Content: string(v)})
 		case chatter.Reply:
 			seq = append(seq, message{Role: "assistant", Content: term.String()})
 		default:

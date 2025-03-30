@@ -4,16 +4,16 @@ go 1.23.1
 
 replace github.com/kshard/chatter => ../
 
-replace github.com/kshard/chatter/openai => ../openai
+replace github.com/kshard/chatter/llm/openai => ../llm/openai
 
-replace github.com/kshard/chatter/bedrock => ../bedrock
+replace github.com/kshard/chatter/llm/bedrock => ../llm/bedrock
 
-replace github.com/kshard/chatter/bedrockbatch => ../bedrockbatch
+replace github.com/kshard/chatter/llm/bedrockbatch => ../llm/bedrockbatch
 
 require (
-	github.com/kshard/chatter v0.3.0
-	github.com/kshard/chatter/bedrock v0.1.0
-	github.com/kshard/chatter/bedrockbatch v0.0.2
+	github.com/kshard/chatter v0.5.0
+	github.com/kshard/chatter/llm/bedrock v0.3.1
+	github.com/kshard/chatter/llm/bedrockbatch v0.0.0
 )
 
 require (
@@ -59,5 +59,6 @@ require (
 	golang.org/x/mod v0.22.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 )

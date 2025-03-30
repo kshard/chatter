@@ -11,32 +11,36 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/bedrock"
+	"github.com/kshard/chatter/aio"
+	"github.com/kshard/chatter/llm/bedrock"
 )
 
 func main() {
-	assistant, err := bedrock.New(
+	llm, err := bedrock.New(
 		bedrock.WithLLM(bedrock.LLAMA3_0_8B_INSTRUCT),
 	)
 	if err != nil {
 		panic(err)
 	}
 
+	assistant := aio.NewLogger(os.Stdout, llm)
+
 	var prompt chatter.Prompt
 	prompt.WithTask("Extract keywords from the text: %s", text)
 
 	reply, err := assistant.Prompt(context.Background(),
 		prompt.ToSeq(),
-		chatter.WithTemperature(0.9),
-		chatter.WithQuota(512),
+		chatter.Temperature(0.9),
+		chatter.Quota(512),
 	)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("==> (in: %d out: %d tokens)\n%s\n",
+	fmt.Printf("\n\n\n==> (in: %d out: %d tokens)\n%s\n",
 		assistant.UsedInputTokens(), assistant.UsedReplyTokens(), reply)
 }
 

@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/kshard/chatter"
-	chat "github.com/kshard/chatter/bedrock"
+	chat "github.com/kshard/chatter/llm/bedrock"
 )
 
 // There are three reviewers who provided the feedback about AWS DynamoDB

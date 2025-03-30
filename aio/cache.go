@@ -6,7 +6,7 @@
 // https://github.com/kshard/chatter
 //
 
-package cache
+package aio
 
 import (
 	"context"
@@ -17,27 +17,47 @@ import (
 	"github.com/kshard/chatter"
 )
 
-// Creates caching layer for LLM client.
+// Getter interface abstract storage
+type Getter interface{ Get([]byte) ([]byte, error) }
+
+// Setter interface abstract storage
+type Putter interface{ Put([]byte, []byte) error }
+
+// KeyVal interface
+type KeyVal interface {
+	Getter
+	Putter
+}
+
+// Caching strategy for LLMs I/O
+type Cache struct {
+	chatter.Chatter
+	cache KeyVal
+}
+
+var _ chatter.Chatter = (*Cache)(nil)
+
+// Creates read-through caching layer for LLM client.
 //
 // Use github.com/akrylysov/pogreb to cache chatter on local file systems:
 //
 //	llm, err := /* create LLM client */
 //	db, err := pogreb.Open("llm.cache", nil)
 //	text := cache.New(db, llm)
-func New(cache Cache, chatter chatter.Chatter) *Client {
-	return &Client{
+func NewCache(cache KeyVal, chatter chatter.Chatter) *Cache {
+	return &Cache{
 		Chatter: chatter,
 		cache:   cache,
 	}
 }
 
-func (c *Client) HashKey(prompt string) []byte {
+func (c *Cache) HashKey(prompt string) []byte {
 	hash := sha1.New()
 	hash.Write([]byte(prompt))
 	return hash.Sum(nil)
 }
 
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+func (c *Cache) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
 	if len(prompt) == 0 {
 		return chatter.Reply{}, fmt.Errorf("bad request, empty prompt")
 	}

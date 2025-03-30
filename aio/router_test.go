@@ -6,51 +6,34 @@
 // https://github.com/kshard/chatter
 //
 
-package llms_test
+package aio_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/fogfish/it/v2"
 	"github.com/kshard/chatter"
-	proxy "github.com/kshard/chatter/llms"
+	"github.com/kshard/chatter/aio"
 )
-
-type mock struct {
-	reply chatter.Reply
-	err   error
-}
-
-func (m *mock) UsedInputTokens() int { return 0 }
-func (m *mock) UsedReplyTokens() int { return 0 }
-
-func (m *mock) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
-	return m.reply, m.err
-}
 
 func TestProxy_Prompt(t *testing.T) {
 	llms := map[string]chatter.Chatter{
-		"model1": &mock{
-			reply: chatter.Reply{
-				Text:            "model1",
-				UsedInputTokens: 10,
-				UsedReplyTokens: 20,
-			},
-		},
+		"model1": &mock{chatter.Reply{
+			Text:            "model1",
+			UsedInputTokens: 10,
+			UsedReplyTokens: 20,
+		}},
 	}
-	fallback := &mock{
-		reply: chatter.Reply{
-			Text:            "fallback",
-			UsedInputTokens: 5,
-			UsedReplyTokens: 15,
-		},
-	}
-	p := proxy.New(llms, fallback)
+	fallback := &mock{chatter.Reply{
+		Text:            "fallback",
+		UsedInputTokens: 5,
+		UsedReplyTokens: 15,
+	}}
+	p := aio.NewRouter(llms, fallback)
 
 	t.Run("Routing", func(t *testing.T) {
-		reply, err := p.Prompt(context.Background(), nil, proxy.Model("model1"))
+		reply, err := p.Prompt(context.Background(), nil, aio.Route("model1"))
 		it.Then(t).Should(
 			it.Nil(err),
 			it.Equal(reply.UsedInputTokens, 10),
@@ -60,7 +43,7 @@ func TestProxy_Prompt(t *testing.T) {
 	})
 
 	t.Run("Unknown", func(t *testing.T) {
-		reply, err := p.Prompt(context.Background(), nil, proxy.Model("unkown"))
+		reply, err := p.Prompt(context.Background(), nil, aio.Route("unkown"))
 		it.Then(t).Should(
 			it.Nil(err),
 			it.Equal(reply.UsedInputTokens, 5),

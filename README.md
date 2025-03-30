@@ -54,26 +54,6 @@
     <td>
       AWS Bedrock Batch Inference
     </td></tr>
-    <!-- Module LLM caching -->
-    <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=cache/*"/>
-    </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/cache">
-      <img src="https://img.shields.io/badge/doc-cache-007d9c?logo=go&logoColor=white&style=platic" />
-    </a></td>
-    <td>
-      LLMs query/reply caching
-    </td></tr>
-    <!-- Module LLMs pool  -->
-    <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llms/*"/>
-    </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llms">
-      <img src="https://img.shields.io/badge/doc-llms-007d9c?logo=go&logoColor=white&style=platic" />
-    </a></td>
-    <td>
-      Dynamic routing for LLMs instances
-    </td></tr>
 		<!-- Module openai -->
     <tr><td><a href=".">
       <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*"/>
@@ -90,8 +70,9 @@
 
 ---
 
+`chatter` is an adapter library that integrates with popular Large Language Models (LLMs) and hosting solutions optimized for text generation. It supports AWS Bedrock, OpenAI, and OpenAI-compatible models, providing a unified interface for seamless interaction.
 
-The library is adapter over various popular Large Language Models (LLMs) tuned for text generation: AWS BedRock, OpenAI.
+In addition to model integration, `chatter` uses composable utilities such as caching, rate-limiting, and more, enabling efficient and scalable AI-powered applications.
 
 
 ## Inspiration
@@ -124,7 +105,7 @@ import (
 	"fmt"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/bedrock"
+	"github.com/kshard/chatter/llm/bedrock"
 )
 
 func main() {
@@ -151,7 +132,7 @@ func main() {
 
 ```go
 import (
-	"github.com/kshard/chatter/openai"
+	"github.com/kshard/chatter/llm/openai"
 )
 
 assistant, err := openai.New(

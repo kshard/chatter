@@ -36,9 +36,9 @@
     </td></tr>
     <!-- Module bedrock -->
     <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=bedrock/*"/>
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llm/bedrock/*"/>
     </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/bedrock">
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llm/bedrock">
       <img src="https://img.shields.io/badge/doc-bedrock-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>
@@ -46,9 +46,9 @@
     </td></tr>
     <!-- Module bedrock batch -->
     <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=bedrockbatch/*"/>
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llm/bedrockbatch/*"/>
     </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/bedrockbatch">
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llm/bedrockbatch">
       <img src="https://img.shields.io/badge/doc-bedrockbatch-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>
@@ -56,9 +56,9 @@
     </td></tr>
 		<!-- Module openai -->
     <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=openai/*"/>
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llm/openai/*"/>
     </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/openai">
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llm/openai">
       <img src="https://img.shields.io/badge/doc-openai-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>

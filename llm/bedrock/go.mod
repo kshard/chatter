@@ -1,4 +1,4 @@
-module github.com/kshard/chatter/bedrock
+module github.com/kshard/chatter/llm/bedrock
 
 go 1.23.0
 

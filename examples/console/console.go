@@ -14,7 +14,7 @@ import (
 	"net/http"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/bedrock"
+	"github.com/kshard/chatter/llm/bedrock"
 )
 
 var defllm = bedrock.LLAMA3_1_405B_INSTRUCT

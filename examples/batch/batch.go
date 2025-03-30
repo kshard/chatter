@@ -15,8 +15,8 @@ import (
 	"os"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/bedrock"
-	"github.com/kshard/chatter/bedrockbatch"
+	"github.com/kshard/chatter/llm/bedrock"
+	"github.com/kshard/chatter/llm/bedrockbatch"
 )
 
 func main() {

@@ -8,4 +8,4 @@
 
 package bedrockbatch
 
-const Version = "bedrockbatch/v0.1.0"
+const Version = "llm/bedrockbatch/v0.2.0"

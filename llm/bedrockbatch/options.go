@@ -17,7 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 	"github.com/fogfish/opts"
 	"github.com/fogfish/stream"
-	bedrockapi "github.com/kshard/chatter/bedrock"
+	bedrockapi "github.com/kshard/chatter/llm/bedrock"
 )
 
 type Option = opts.Option[Client]

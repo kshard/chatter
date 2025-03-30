@@ -1,4 +1,4 @@
-module github.com/kshard/chatter/bedrockbatch
+module github.com/kshard/chatter/llm/bedrockbatch
 
 go 1.23.1
 
@@ -12,8 +12,8 @@ require (
 	github.com/fogfish/guid/v2 v2.1.0
 	github.com/fogfish/opts v0.0.5
 	github.com/fogfish/stream v1.2.1
-	github.com/kshard/chatter v0.4.1
-	github.com/kshard/chatter/bedrock v0.2.0
+	github.com/kshard/chatter v0.5.0
+	github.com/kshard/chatter/llm/bedrock v0.3.1
 )
 
 require (

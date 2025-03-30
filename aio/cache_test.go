@@ -6,21 +6,20 @@
 // https://github.com/kshard/embeddings
 //
 
-package cache_test
+package aio_test
 
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/cache"
+	"github.com/kshard/chatter/aio"
 )
 
 func TestCache(t *testing.T) {
 	kv := keyval{}
-	c := cache.New(kv, llm{})
+	c := aio.NewCache(kv, mock{})
 
 	var prompt chatter.Prompt
 	prompt.WithTask("Make me a test.")
@@ -34,16 +33,6 @@ func TestCache(t *testing.T) {
 			t.Errorf("unexpected key")
 		}
 	}
-}
-
-// mock embedding client
-type llm struct{}
-
-func (llm) UsedInputTokens() int { return 5 }
-func (llm) UsedReplyTokens() int { return 10 }
-
-func (llm) Prompt(context.Context, []fmt.Stringer, ...chatter.Opt) (chatter.Reply, error) {
-	return chatter.Reply{Text: "Looking for testing"}, nil
 }
 
 // mock key-value

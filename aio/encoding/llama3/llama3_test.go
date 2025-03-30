@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/fogfish/it/v2"
-	"github.com/kshard/chatter/encoding/llama3"
+	"github.com/kshard/chatter/aio/encoding/llama3"
 )
 
 func TestEncoder(t *testing.T) {

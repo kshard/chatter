@@ -6,7 +6,7 @@
 // https://github.com/kshard/chatter
 //
 
-package llms
+package aio
 
 import (
 	"context"
@@ -15,36 +15,39 @@ import (
 	"github.com/kshard/chatter"
 )
 
-// LLM pool specific parameter allowing to dynamically route request to models
-type Model string
+// Chatter interface option allowing to dynamically route prompts to choosen models
+type Route string
 
-func (Model) ChatterOpt() {}
+func (Route) ChatterOpt() {}
 
-// LLM pool consists of default "route" and multiple named models.
-type Pool struct {
+// Dynamic routing strategy throught pool of LLMs.
+// The LLMs pool consists of default "route" and multiple named models.
+type Router struct {
 	llms            map[string]chatter.Chatter
 	fallback        chatter.Chatter
 	usedInputTokens int
 	usedReplyTokens int
 }
 
+var _ chatter.Chatter = (*Router)(nil)
+
 // Creates LLMs pools instance
-func New(llms map[string]chatter.Chatter, fallback chatter.Chatter) *Pool {
-	return &Pool{
+func NewRouter(llms map[string]chatter.Chatter, fallback chatter.Chatter) *Router {
+	return &Router{
 		llms:     llms,
 		fallback: fallback,
 	}
 }
 
-func (p *Pool) UsedInputTokens() int { return p.usedInputTokens }
-func (p *Pool) UsedReplyTokens() int { return p.usedReplyTokens }
+func (p *Router) UsedInputTokens() int { return p.usedInputTokens }
+func (p *Router) UsedReplyTokens() int { return p.usedReplyTokens }
 
-func (p *Pool) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+func (p *Router) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
 	llm := p.fallback
 
 	for _, opt := range opts {
 		switch v := opt.(type) {
-		case Model:
+		case Route:
 			if l, has := p.llms[string(v)]; has {
 				llm = l
 			}

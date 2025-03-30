@@ -1,4 +1,4 @@
-module github.com/kshard/chatter/openai
+module github.com/kshard/chatter/llm/openai
 
 go 1.23.0
 

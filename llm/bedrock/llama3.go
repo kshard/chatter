@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/encoding/llama3"
+	"github.com/kshard/chatter/aio/encoding/llama3"
 )
 
 // Meta Llama3 model family
@@ -31,6 +31,7 @@ const (
 	LLAMA3_2_3B_INSTRUCT   = Llama3("meta.llama3-2-3b-instruct-v1:0")
 	LLAMA3_2_11B_INSTRUCT  = Llama3("meta.llama3-2-11b-instruct-v1:0")
 	LLAMA3_2_90B_INSTRUCT  = Llama3("meta.llama3-2-90b-instruct-v1:0")
+	LLAMA3_3_70B_INSTRUCT  = Llama3("meta.llama3-3-70b-instruct-v1:0")
 )
 
 func (v Llama3) ModelID() string { return string(v) }

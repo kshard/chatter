@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/kshard/chatter"
-	"github.com/kshard/chatter/encoding/text"
+	"github.com/kshard/chatter/aio/encoding/text"
 )
 
 // Amazon Titan Text model family

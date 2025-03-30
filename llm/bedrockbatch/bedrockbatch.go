@@ -21,7 +21,7 @@ import (
 	"github.com/fogfish/opts"
 	"github.com/fogfish/stream"
 	"github.com/kshard/chatter"
-	bedrockapi "github.com/kshard/chatter/bedrock"
+	bedrockapi "github.com/kshard/chatter/llm/bedrock"
 )
 
 type Client struct {

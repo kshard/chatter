@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/kshard/chatter"
-	chat "github.com/kshard/chatter/llm/bedrock"
+	"github.com/kshard/chatter/llm/autoconfig"
 )
 
 // There are three reviewers who provided the feedback about AWS DynamoDB
@@ -47,9 +47,7 @@ var review = []string{
 }
 
 func main() {
-	assistant, err := chat.New(
-		chat.WithLLM(chat.LLAMA3_0_8B_INSTRUCT),
-	)
+	assistant, err := autoconfig.New("chatter")
 	if err != nil {
 		panic(err)
 	}

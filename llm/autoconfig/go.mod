@@ -1,18 +1,13 @@
-module github.com/kshard/chatter/examples
+module github.com/kshard/chatter/llm/autoconfig
 
-go 1.23.1
-
-replace github.com/kshard/chatter => ../
-
-replace github.com/kshard/chatter/llm/autoconfig => ../llm/autoconfig
-
-replace github.com/kshard/chatter/llm/bedrockbatch => ../llm/bedrockbatch
+go 1.23.0
 
 require (
+	github.com/fogfish/gurl/v2 v2.10.0
+	github.com/jdxcode/netrc v1.0.0
 	github.com/kshard/chatter v0.5.1
-	github.com/kshard/chatter/llm/autoconfig v0.0.0-00010101000000-000000000000
 	github.com/kshard/chatter/llm/bedrock v0.3.1
-	github.com/kshard/chatter/llm/bedrockbatch v0.0.0
+	github.com/kshard/chatter/llm/openai v0.3.1
 )
 
 require (
@@ -24,18 +19,12 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.6 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.28 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.15 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.32 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.2 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/bedrock v1.26.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.24.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.13 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.24.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.28.14 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.14 // indirect
@@ -49,13 +38,8 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fogfish/golem/hseq v1.3.0 // indirect
 	github.com/fogfish/golem/optics v0.14.0 // indirect
-	github.com/fogfish/guid/v2 v2.1.0 // indirect
-	github.com/fogfish/gurl/v2 v2.10.0 // indirect
 	github.com/fogfish/opts v0.0.5 // indirect
-	github.com/fogfish/stream v1.2.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/jdxcode/netrc v1.0.0 // indirect
-	github.com/kshard/chatter/llm/openai v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
@@ -64,6 +48,5 @@ require (
 	golang.org/x/net v0.32.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 )

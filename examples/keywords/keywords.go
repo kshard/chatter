@@ -15,13 +15,11 @@ import (
 
 	"github.com/kshard/chatter"
 	"github.com/kshard/chatter/aio"
-	"github.com/kshard/chatter/llm/bedrock"
+	"github.com/kshard/chatter/llm/autoconfig"
 )
 
 func main() {
-	llm, err := bedrock.New(
-		bedrock.WithLLM(bedrock.LLAMA3_0_8B_INSTRUCT),
-	)
+	llm, err := autoconfig.New("chatter")
 	if err != nil {
 		panic(err)
 	}

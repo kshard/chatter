@@ -128,7 +128,7 @@ func main() {
 }
 ```
 
-`openai` module is also enables consumption of OpenAI compatible interfaces (e.g. LM Studio). It only requires explicit configuration of the host where model is hosted.
+**Using LM Studio** `openai` module is also enables consumption of OpenAI compatible interfaces (e.g. LM Studio). It only requires explicit configuration of the host where model is hosted.
 
 ```go
 import (
@@ -138,6 +138,14 @@ import (
 assistant, err := openai.New(
   openai.WithHost("http://localhost:1234"),
   openai.WithLLM(openai.LLM("gemma-3-27b-it")),
+)
+```
+
+**Using AWS Bedrock Inference Profiles** See the [explanation about usage of models with inference profile](https://repost.aws/questions/QUEU82wbYVQk2oU4eNwyiong/bedrock-api-invocation-error-on-demand-throughput-isn-s-supported)
+
+```go
+bedrock.New(
+	bedrock.WithLLM("us." + bedrock.LLAMA3_0_8B_INSTRUCT),
 )
 ```
 

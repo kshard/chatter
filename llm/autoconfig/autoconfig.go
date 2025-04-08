@@ -12,7 +12,10 @@ import (
 	"fmt"
 	"os/user"
 	"path/filepath"
+	"strconv"
+	"time"
 
+	"github.com/fogfish/gurl/v2/http"
 	ø "github.com/fogfish/gurl/v2/http/send"
 	"github.com/jdxcode/netrc"
 	"github.com/kshard/chatter"
@@ -84,7 +87,18 @@ func makeOpenAI(conf *netrc.Machine, model string) (chatter.Chatter, error) {
 		model = conf.Get("model")
 	}
 
+	timeout := 2 * time.Minute
+	if minutes := conf.Get("timeout"); len(minutes) != 0 {
+		if min, err := strconv.Atoi(minutes); err == nil {
+			timeout = time.Duration(min) * time.Minute
+		}
+	}
+
+	cli := http.Client()
+	cli.Timeout = timeout
+
 	return openai.New(
+		openai.WithHTTP(http.WithClient(cli)),
 		openai.WithHost(ø.Authority(host)),
 		openai.WithSecret(secret),
 		openai.WithLLM(openai.LLM(model)),

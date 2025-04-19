@@ -9,12 +9,76 @@
 package bedrock
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/aws/aws-cdk-go/awscdk/v2"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsbedrock"
 	"github.com/aws/aws-cdk-go/awscdk/v2/awsiam"
 	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
 )
+
+type InferenceProfile struct {
+	constructs.Construct
+	profile *string
+	llm     awsbedrock.FoundationModel
+}
+
+func NewInferenceProfile(scope constructs.Construct, id *string, profile *string) *InferenceProfile {
+	if profile == nil {
+		panic(fmt.Errorf("undefined inference profile"))
+	}
+
+	seq := strings.SplitN(*profile, ".", 2)
+	if len(seq) != 2 {
+		panic(fmt.Errorf("invalid inference profile"))
+	}
+
+	c := &InferenceProfile{Construct: constructs.NewConstruct(scope, id)}
+	c.profile = profile
+	c.llm = awsbedrock.FoundationModel_FromFoundationModelId(
+		c.Construct,
+		jsii.String("LLM"),
+		awsbedrock.NewFoundationModelIdentifier(jsii.String(seq[1])),
+	)
+
+	return c
+}
+
+func (c *InferenceProfile) GrantAccessIn(grantee awsiam.IGrantable, region *string) {
+	parn := awscdk.Stack_Of(c.Construct).FormatArn(
+		&awscdk.ArnComponents{
+			ArnFormat:    awscdk.ArnFormat_SLASH_RESOURCE_NAME,
+			Service:      jsii.String("bedrock"),
+			Account:      awscdk.Aws_ACCOUNT_ID(),
+			Region:       region,
+			Resource:     jsii.String("inference-profile"),
+			ResourceName: c.profile,
+		},
+	)
+
+	larn := awscdk.Stack_Of(c.Construct).FormatArn(
+		&awscdk.ArnComponents{
+			ArnFormat:    awscdk.ArnFormat_SLASH_RESOURCE_NAME,
+			Service:      jsii.String("bedrock"),
+			Account:      jsii.String(""),
+			Region:       jsii.String("*"),
+			Resource:     jsii.String("foundation-model"),
+			ResourceName: c.llm.ModelId(),
+		},
+	)
+
+	awsiam.Grant_AddToPrincipal(
+		&awsiam.GrantOnPrincipalOptions{
+			Grantee:      grantee,
+			Actions:      jsii.Strings("bedrock:InvokeModel"),
+			ResourceArns: jsii.Strings(*parn, *larn),
+		},
+	)
+}
+
+//------------------------------------------------------------------------------
 
 type FoundationModel struct {
 	constructs.Construct
@@ -60,77 +124,5 @@ func (c *FoundationModel) GrantAccessIn(grantee awsiam.IGrantable, region *strin
 			Actions:      jsii.Strings("bedrock:InvokeModel"),
 			ResourceArns: jsii.Strings(*arn),
 		},
-	)
-}
-
-func NewTitanTextLiteV1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("TitanTextLiteV1"),
-		awsbedrock.FoundationModelIdentifier_AMAZON_TITAN_TEXT_LITE_V1(),
-	)
-}
-
-func NewTitanTextExpressV1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("TitanTextExpressV1"),
-		awsbedrock.FoundationModelIdentifier_AMAZON_TITAN_TEXT_EXPRESS_V1_0_8K(),
-	)
-}
-
-func NewTitanTextPremierV1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("TitanTextPremierV1"),
-		awsbedrock.FoundationModelIdentifier_AMAZON_TITAN_TEXT_PREMIER_V1(),
-	)
-}
-
-func NewMetaLlama30B8V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama30B8V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_8B_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama30B70V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama30B70V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_70_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama31B8V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B8V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_1_8B_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama31B70V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B70V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_1_70_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama31B405V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B405V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_1_405_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama32B1V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B1V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_2_1B_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama32B3V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B3V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_2_3B_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama32B11V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B11V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_2_11B_INSTRUCT_V1(),
-	)
-}
-
-func NewMetaLlama32B90V1(scope constructs.Construct) *FoundationModel {
-	return NewFoundationModel(scope, jsii.String("MetaLlama31B90V1"),
-		awsbedrock.FoundationModelIdentifier_META_LLAMA_3_2_90B_INSTRUCT_V1(),
 	)
 }

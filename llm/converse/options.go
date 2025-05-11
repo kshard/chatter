@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
 	"github.com/fogfish/opts"
+	"github.com/kshard/chatter"
 )
 
 type Option = opts.Option[Client]
@@ -35,7 +36,7 @@ var (
 	WithLLM = opts.ForType[Client, LLM]()
 
 	// Set default registry
-	WithRegistry = opts.ForType[Client, Registry]()
+	WithRegistry = opts.ForType[Client, chatter.Registry]()
 
 	// Use aws.Config to config the client
 	WithConfig = opts.FMap(optsFromConfig)

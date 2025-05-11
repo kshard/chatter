@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.30.0
 	github.com/fogfish/opts v0.0.5
-	github.com/kshard/chatter v0.6.0
+	github.com/kshard/chatter v0.6.1
 )
 
 require (

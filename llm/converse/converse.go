@@ -28,15 +28,10 @@ type Bedrock interface {
 	Converse(ctx context.Context, params *bedrockruntime.ConverseInput, optFns ...func(*bedrockruntime.Options)) (*bedrockruntime.ConverseOutput, error)
 }
 
-// Command registry
-type Registry []chatter.Cmd
-
-func (Registry) ChatterOpt() {}
-
 type Client struct {
 	api             Bedrock
 	llm             LLM
-	registry        Registry
+	registry        chatter.Registry
 	usedInputTokens int
 	usedReplyTokens int
 }
@@ -90,7 +85,9 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 			inquiry.InferenceConfig.TopP = aws.Float32(float32(v))
 		case chatter.Quota:
 			inquiry.InferenceConfig.MaxTokens = aws.Int32(int32(v))
-		case Registry:
+		case chatter.StopSequence:
+			inquiry.InferenceConfig.StopSequences = []string{string(v)}
+		case chatter.Registry:
 			reg, err := toToolConfig(v)
 			if err != nil {
 				return nil, err
@@ -267,7 +264,7 @@ func toMessage(msg fmt.Stringer) (types.Message, error) {
 	return types.Message{}, fmt.Errorf("invalid content block")
 }
 
-func toToolConfig(registry Registry) (*types.ToolConfiguration, error) {
+func toToolConfig(registry chatter.Registry) (*types.ToolConfiguration, error) {
 	tools := &types.ToolConfiguration{
 		ToolChoice: &types.ToolChoiceMemberAuto{},
 		Tools:      []types.Tool{},

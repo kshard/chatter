@@ -36,5 +36,5 @@ github.com/fogfish/it/v2 v2.2.1 h1:NuuaENAZka8XiJkEj2Q6THRsHSwleC/BLDux82NvkII=
 github.com/fogfish/it/v2 v2.2.1/go.mod h1:HHwufnTaZTvlRVnSesPl49HzzlMrQtweKbf+8Co/ll4=
 github.com/fogfish/opts v0.0.5 h1:Bh3Nucr1kx7G1F0Tq3DxO14/qYgmR6C2GjWr2k6O+Oc=
 github.com/fogfish/opts v0.0.5/go.mod h1:+HM1YrMsTzfouZRoHfPOsGT9VZw+0ZBKZ36PMqoNFqM=
-github.com/kshard/chatter v0.6.0 h1:p2hD98TBzHgP1mJzW9lAcZxAhw+4Q2dh8beSeoXbNdM=
-github.com/kshard/chatter v0.6.0/go.mod h1:Rg3cAzmXVoHGFKDJ8mbp8UUmYwHqOf5bkArIMX2irhE=
+github.com/kshard/chatter v0.6.1 h1:IWBUEQnNupEOZLjd2eXsoOz1qgrsr+jZPCdRpZzoABM=
+github.com/kshard/chatter v0.6.1/go.mod h1:Rg3cAzmXVoHGFKDJ8mbp8UUmYwHqOf5bkArIMX2irhE=

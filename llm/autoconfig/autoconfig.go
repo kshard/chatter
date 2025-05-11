@@ -20,6 +20,7 @@ import (
 	"github.com/jdxcode/netrc"
 	"github.com/kshard/chatter"
 	"github.com/kshard/chatter/llm/bedrock"
+	"github.com/kshard/chatter/llm/converse"
 	"github.com/kshard/chatter/llm/openai"
 )
 
@@ -49,6 +50,8 @@ func New(host string, model ...string) (chatter.Chatter, error) {
 	switch lpd {
 	case "bedrock":
 		return makeBedrock(machine, mid)
+	case "converse":
+		return makeConverse(machine, mid)
 	case "openai":
 		return makeOpenAI(machine, mid)
 	default:
@@ -75,6 +78,18 @@ func makeBedrock(conf *netrc.Machine, model string) (chatter.Chatter, error) {
 	}
 
 	return bedrock.New(llm, bedrock.WithRegion(region))
+}
+
+func makeConverse(conf *netrc.Machine, model string) (chatter.Chatter, error) {
+	region := conf.Get("region")
+	if len(model) == 0 {
+		model = conf.Get("model")
+	}
+
+	return converse.New(
+		converse.WithLLM(converse.LLM(model)),
+		converse.WithRegion(region),
+	)
 }
 
 func makeOpenAI(conf *netrc.Machine, model string) (chatter.Chatter, error) {

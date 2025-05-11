@@ -50,3 +50,8 @@ func (Quota) ChatterOpt() {}
 type StopSequence string
 
 func (StopSequence) ChatterOpt() {}
+
+// Command registry is a sequence of tools available for LLM usage.
+type Registry []Cmd
+
+func (Registry) ChatterOpt() {}

@@ -19,7 +19,14 @@ import (
 
 func TestCache(t *testing.T) {
 	kv := keyval{}
-	c := aio.NewCache(kv, mock{})
+	c := aio.NewCache(kv, mock{
+		&chatter.Reply{
+			Stage: chatter.LLM_RETURN,
+			Content: []chatter.Content{
+				chatter.ContentText{Text: "test"},
+			},
+		},
+	})
 
 	var prompt chatter.Prompt
 	prompt.WithTask("Make me a test.")

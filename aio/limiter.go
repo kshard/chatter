@@ -38,21 +38,21 @@ func NewLimiter(requestPerMin int, tokensPerMin int, chatter chatter.Chatter) *L
 	}
 }
 
-func (c *Limiter) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+func (c *Limiter) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
 	if err := c.rps.Wait(ctx); err != nil {
-		return chatter.Reply{}, err
+		return nil, err
 	}
 
 	if err := c.tps.WaitN(ctx, c.debt); err != nil {
-		return chatter.Reply{}, err
+		return nil, err
 	}
 
 	reply, err := c.Chatter.Prompt(ctx, prompt, opts...)
 	if err != nil {
-		return chatter.Reply{}, err
+		return nil, err
 	}
 
-	c.debt = reply.UsedInputTokens + reply.UsedReplyTokens
+	c.debt = reply.Usage.InputTokens + reply.Usage.ReplyTokens
 
 	slog.Debug("LLM is prompted",
 		slog.Float64("budget", c.tps.Tokens()),
@@ -62,8 +62,8 @@ func (c *Limiter) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...cha
 			slog.Int("replyTokens", c.Chatter.UsedReplyTokens()),
 		),
 		slog.Group("prompt",
-			slog.Int("inputTokens", reply.UsedInputTokens),
-			slog.Int("replyTokens", reply.UsedReplyTokens),
+			slog.Int("inputTokens", reply.Usage.InputTokens),
+			slog.Int("replyTokens", reply.Usage.ReplyTokens),
 		),
 	)
 

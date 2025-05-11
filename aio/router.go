@@ -23,10 +23,9 @@ func (Route) ChatterOpt() {}
 // Dynamic routing strategy throught pool of LLMs.
 // The LLMs pool consists of default "route" and multiple named models.
 type Router struct {
-	llms            map[string]chatter.Chatter
-	fallback        chatter.Chatter
-	usedInputTokens int
-	usedReplyTokens int
+	llms     map[string]chatter.Chatter
+	fallback chatter.Chatter
+	usage    chatter.Usage
 }
 
 var _ chatter.Chatter = (*Router)(nil)
@@ -39,10 +38,10 @@ func NewRouter(llms map[string]chatter.Chatter, fallback chatter.Chatter) *Route
 	}
 }
 
-func (p *Router) UsedInputTokens() int { return p.usedInputTokens }
-func (p *Router) UsedReplyTokens() int { return p.usedReplyTokens }
+func (p *Router) UsedInputTokens() int { return p.usage.InputTokens }
+func (p *Router) UsedReplyTokens() int { return p.usage.ReplyTokens }
 
-func (p *Router) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+func (p *Router) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
 	llm := p.fallback
 
 	for _, opt := range opts {
@@ -59,8 +58,8 @@ func (p *Router) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 		return reply, err
 	}
 
-	p.usedInputTokens += reply.UsedInputTokens
-	p.usedReplyTokens += reply.UsedReplyTokens
+	p.usage.InputTokens += reply.Usage.InputTokens
+	p.usage.ReplyTokens += reply.Usage.ReplyTokens
 
 	return reply, nil
 }

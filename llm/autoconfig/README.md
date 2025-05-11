@@ -14,6 +14,14 @@ myservice
   model meta.llama3-1-70b-instruct-v1:0
 ```
 
+Configure AWs Bedrock Converse API
+```
+myservice
+  provider converse
+  region us-east-1
+  model us.anthropic.claude-3-7-sonnet-20250219-v1:0
+```
+
 Configure OpenAI API
 ```
 myservice

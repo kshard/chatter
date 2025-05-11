@@ -56,7 +56,7 @@ func (v Llama3) Encode(prompt []fmt.Stringer, opts ...chatter.Opt) (req []byte, 
 				return
 			}
 		case chatter.Reply:
-			err = codec.Reply(v.Text)
+			err = codec.Reply(v.String())
 			if err != nil {
 				return
 			}
@@ -96,9 +96,13 @@ func (Llama3) Decode(data []byte) (r chatter.Reply, err error) {
 		return
 	}
 
-	r.Text = reply.Text
-	r.UsedInputTokens = reply.UsedPromptTokens
-	r.UsedReplyTokens = reply.UsedTextTokens
+	r.Content = []chatter.Content{
+		chatter.ContentText{
+			Text: reply.Text,
+		},
+	}
+	r.Usage.InputTokens = reply.UsedPromptTokens
+	r.Usage.ReplyTokens = reply.UsedTextTokens
 
 	return
 }

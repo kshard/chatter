@@ -12,7 +12,7 @@ require (
 	github.com/aws/constructs-go/constructs/v10 v10.4.2
 	github.com/aws/jsii-runtime-go v1.106.0
 	github.com/fogfish/opts v0.0.5
-	github.com/kshard/chatter v0.5.0
+	github.com/kshard/chatter v0.6.0
 )
 
 require (

@@ -54,7 +54,7 @@ func (Titan) Encode(prompt []fmt.Stringer, opts ...chatter.Opt) (req []byte, err
 				return
 			}
 		case chatter.Reply:
-			err = codec.Reply(v.Text)
+			err = codec.Reply(v.String())
 			if err != nil {
 				return
 			}
@@ -96,15 +96,19 @@ func (Titan) Decode(data []byte) (r chatter.Reply, err error) {
 		return
 	}
 
-	r.UsedInputTokens = reply.UsedPromptTokens
+	r.Usage.InputTokens = reply.UsedPromptTokens
 
 	sb := strings.Builder{}
 	for _, text := range reply.Result {
 		sb.WriteString(strings.TrimPrefix(text.Text, "Bot:"))
 		sb.WriteRune('\n')
-		r.UsedReplyTokens += text.UsedTextTokens
+		r.Usage.ReplyTokens += text.UsedTextTokens
 	}
-	r.Text = sb.String()
+	r.Content = []chatter.Content{
+		chatter.ContentText{
+			Text: sb.String(),
+		},
+	}
 
 	return
 }

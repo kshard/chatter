@@ -53,7 +53,7 @@ func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
 func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
 
 // Send prompt
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (reply chatter.Reply, err error) {
+func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (reply *chatter.Reply, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
@@ -107,10 +107,16 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 		return
 	}
 
-	reply = chatter.Reply{
-		Text:            bag.Choices[0].Message.Content,
-		UsedInputTokens: bag.Usage.PromptTokens,
-		UsedReplyTokens: bag.Usage.OutputTokens,
+	reply = &chatter.Reply{
+		Content: []chatter.Content{
+			chatter.ContentText{
+				Text: bag.Choices[0].Message.Content,
+			},
+		},
+		Usage: chatter.Usage{
+			InputTokens: bag.Usage.PromptTokens,
+			ReplyTokens: bag.Usage.OutputTokens,
+		},
 	}
 
 	return

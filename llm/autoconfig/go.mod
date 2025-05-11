@@ -7,7 +7,7 @@ require (
 	github.com/jdxcode/netrc v1.0.0
 	github.com/kshard/chatter v0.6.0
 	github.com/kshard/chatter/llm/bedrock v0.4.0
-	github.com/kshard/chatter/llm/converse v0.0.1
+	github.com/kshard/chatter/llm/converse v0.0.2
 	github.com/kshard/chatter/llm/openai v0.4.0
 )
 

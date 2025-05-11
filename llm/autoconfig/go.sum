@@ -67,12 +67,12 @@ github.com/jdxcode/netrc v1.0.0/go.mod h1:Zi/ZFkEqFHTm7qkjyNJjaWH4LQA9LQhGJyF0lT
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/kshard/chatter v0.6.0 h1:p2hD98TBzHgP1mJzW9lAcZxAhw+4Q2dh8beSeoXbNdM=
-github.com/kshard/chatter v0.6.0/go.mod h1:Rg3cAzmXVoHGFKDJ8mbp8UUmYwHqOf5bkArIMX2irhE=
+github.com/kshard/chatter v0.6.1 h1:IWBUEQnNupEOZLjd2eXsoOz1qgrsr+jZPCdRpZzoABM=
+github.com/kshard/chatter v0.6.1/go.mod h1:Rg3cAzmXVoHGFKDJ8mbp8UUmYwHqOf5bkArIMX2irhE=
 github.com/kshard/chatter/llm/bedrock v0.4.0 h1:gn0IKLmIgL6PDnusNVJngGDowiEmuyVKjDP1gTW4LVE=
 github.com/kshard/chatter/llm/bedrock v0.4.0/go.mod h1:dQSJ/G2aLUglfJBu/ELnOm5EmGl0vPeyNw2OEYkz+4g=
-github.com/kshard/chatter/llm/converse v0.0.2 h1:UmTcZ3HcNDn27SeXATpEKx8Ps0JRPJQLcApVL/PGzqA=
-github.com/kshard/chatter/llm/converse v0.0.2/go.mod h1:PKYekZXl/ftNDGtvVDO0VCK4jdTgSGiBwOKdtSYMsrQ=
+github.com/kshard/chatter/llm/converse v0.0.3 h1:bo92CJPpmvZ5eZ5iu3i5j1H1SWHMjG/fWhu115GSAjA=
+github.com/kshard/chatter/llm/converse v0.0.3/go.mod h1:BsCKM9O7GQZTHPoc7AMVWoNkMOrFajzadgXoXeOke7g=
 github.com/kshard/chatter/llm/openai v0.4.0 h1:xRBJly/4TuaZx0L3UrfwsNJBmvoiKEb/65t1MQ9e4Xg=
 github.com/kshard/chatter/llm/openai v0.4.0/go.mod h1:UYnr+EO+l6vjDc3gX7Dnk+d8YOeorzVlUigL43Kfhpg=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

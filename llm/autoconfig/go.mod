@@ -5,9 +5,9 @@ go 1.23.0
 require (
 	github.com/fogfish/gurl/v2 v2.10.0
 	github.com/jdxcode/netrc v1.0.0
-	github.com/kshard/chatter v0.6.0
+	github.com/kshard/chatter v0.6.1
 	github.com/kshard/chatter/llm/bedrock v0.4.0
-	github.com/kshard/chatter/llm/converse v0.0.2
+	github.com/kshard/chatter/llm/converse v0.0.3
 	github.com/kshard/chatter/llm/openai v0.4.0
 )
 

@@ -19,16 +19,14 @@ import (
 
 func TestProxy_Prompt(t *testing.T) {
 	llms := map[string]chatter.Chatter{
-		"model1": &mock{chatter.Reply{
-			Text:            "model1",
-			UsedInputTokens: 10,
-			UsedReplyTokens: 20,
+		"model1": &mock{&chatter.Reply{
+			Content: []chatter.Content{chatter.ContentText{Text: "model1"}},
+			Usage:   chatter.Usage{InputTokens: 10, ReplyTokens: 20},
 		}},
 	}
-	fallback := &mock{chatter.Reply{
-		Text:            "fallback",
-		UsedInputTokens: 5,
-		UsedReplyTokens: 15,
+	fallback := &mock{&chatter.Reply{
+		Content: []chatter.Content{chatter.ContentText{Text: "fallback"}},
+		Usage:   chatter.Usage{InputTokens: 5, ReplyTokens: 15},
 	}}
 	p := aio.NewRouter(llms, fallback)
 
@@ -36,9 +34,9 @@ func TestProxy_Prompt(t *testing.T) {
 		reply, err := p.Prompt(context.Background(), nil, aio.Route("model1"))
 		it.Then(t).Should(
 			it.Nil(err),
-			it.Equal(reply.UsedInputTokens, 10),
-			it.Equal(reply.UsedReplyTokens, 20),
-			it.Equal(reply.Text, "model1"),
+			it.Equal(reply.Usage.InputTokens, 10),
+			it.Equal(reply.Usage.ReplyTokens, 20),
+			it.Equal(reply.String(), "model1"),
 		)
 	})
 
@@ -46,9 +44,9 @@ func TestProxy_Prompt(t *testing.T) {
 		reply, err := p.Prompt(context.Background(), nil, aio.Route("unkown"))
 		it.Then(t).Should(
 			it.Nil(err),
-			it.Equal(reply.UsedInputTokens, 5),
-			it.Equal(reply.UsedReplyTokens, 15),
-			it.Equal(reply.Text, "fallback"),
+			it.Equal(reply.Usage.InputTokens, 5),
+			it.Equal(reply.Usage.ReplyTokens, 15),
+			it.Equal(reply.String(), "fallback"),
 		)
 	})
 
@@ -56,9 +54,9 @@ func TestProxy_Prompt(t *testing.T) {
 		reply, err := p.Prompt(context.Background(), nil)
 		it.Then(t).Should(
 			it.Nil(err),
-			it.Equal(reply.UsedInputTokens, 5),
-			it.Equal(reply.UsedReplyTokens, 15),
-			it.Equal(reply.Text, "fallback"),
+			it.Equal(reply.Usage.InputTokens, 5),
+			it.Equal(reply.Usage.ReplyTokens, 15),
+			it.Equal(reply.String(), "fallback"),
 		)
 	})
 

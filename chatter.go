@@ -19,17 +19,8 @@ type Opt = interface{ ChatterOpt() }
 type Chatter interface {
 	UsedInputTokens() int
 	UsedReplyTokens() int
-	Prompt(context.Context, []fmt.Stringer, ...Opt) (Reply, error)
+	Prompt(context.Context, []fmt.Stringer, ...Opt) (*Reply, error)
 }
-
-// The reply from LLMs
-type Reply struct {
-	Text            string
-	UsedInputTokens int
-	UsedReplyTokens int
-}
-
-func (reply Reply) String() string { return reply.Text }
 
 // LLMs' critical parameter influencing the balance between predictability
 // and creativity in generated text. Lower temperatures prioritize exploiting
@@ -59,17 +50,3 @@ func (Quota) ChatterOpt() {}
 type StopSequence string
 
 func (StopSequence) ChatterOpt() {}
-
-// Foundational identity of LLMs
-type LLM interface {
-	// Model ID as defined by the vendor
-	ModelID() string
-
-	// Encode prompt to bytes:
-	// - encoding prompt as prompt markup supported by LLM
-	// - encoding prompt to envelop supported by LLM's hosting platform
-	Encode([]fmt.Stringer, ...Opt) ([]byte, error)
-
-	// Decode LLM's reply into pure text
-	Decode([]byte) (Reply, error)
-}

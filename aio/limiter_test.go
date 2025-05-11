@@ -19,7 +19,7 @@ import (
 )
 
 func mockTokensUsage(n int) mock {
-	return mock{chatter.Reply{Text: "", UsedReplyTokens: n}}
+	return mock{&chatter.Reply{Usage: chatter.Usage{ReplyTokens: n}}}
 }
 
 func TestLimiter(t *testing.T) {

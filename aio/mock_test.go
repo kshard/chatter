@@ -16,12 +16,12 @@ import (
 )
 
 type mock struct {
-	reply chatter.Reply
+	reply *chatter.Reply
 }
 
-func (mock mock) UsedInputTokens() int { return mock.reply.UsedInputTokens }
-func (mock mock) UsedReplyTokens() int { return mock.reply.UsedReplyTokens }
+func (mock mock) UsedInputTokens() int { return mock.reply.Usage.InputTokens }
+func (mock mock) UsedReplyTokens() int { return mock.reply.Usage.ReplyTokens }
 
-func (mock mock) Prompt(context.Context, []fmt.Stringer, ...chatter.Opt) (chatter.Reply, error) {
+func (mock mock) Prompt(context.Context, []fmt.Stringer, ...chatter.Opt) (*chatter.Reply, error) {
 	return mock.reply, nil
 }

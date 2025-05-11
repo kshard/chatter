@@ -57,29 +57,36 @@ func (c *Cache) HashKey(prompt string) []byte {
 	return hash.Sum(nil)
 }
 
-func (c *Cache) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (chatter.Reply, error) {
+func (c *Cache) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
 	if len(prompt) == 0 {
-		return chatter.Reply{}, fmt.Errorf("bad request, empty prompt")
+		return nil, fmt.Errorf("bad request, empty prompt")
 	}
 
 	hkey := c.HashKey(prompt[len(prompt)-1].String())
 	val, err := c.cache.Get(hkey)
 	if err != nil {
-		return chatter.Reply{}, err
+		return nil, err
 	}
 
 	if len(val) != 0 {
-		return chatter.Reply{Text: string(val)}, nil
+		return &chatter.Reply{
+			Stage: chatter.LLM_RETURN,
+			Content: []chatter.Content{
+				chatter.ContentText{Text: string(val)},
+			},
+		}, nil
 	}
 
 	reply, err := c.Chatter.Prompt(ctx, prompt, opts...)
 	if err != nil {
-		return chatter.Reply{}, err
+		return nil, err
 	}
 
-	err = c.cache.Put(hkey, []byte(reply.Text))
-	if err != nil {
-		slog.Warn("failed to cache LLM reply", "err", err)
+	if reply != nil && reply.Stage == chatter.LLM_RETURN {
+		err = c.cache.Put(hkey, []byte(reply.String()))
+		if err != nil {
+			slog.Warn("failed to cache LLM reply", "err", err)
+		}
 	}
 
 	return reply, nil

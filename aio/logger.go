@@ -30,7 +30,7 @@ func NewLogger(w io.Writer, chatter chatter.Chatter) *Logger {
 	}
 }
 
-func (deb *Logger) Prompt(ctx context.Context, seq []fmt.Stringer, opt ...chatter.Opt) (chatter.Reply, error) {
+func (deb *Logger) Prompt(ctx context.Context, seq []fmt.Stringer, opt ...chatter.Opt) (*chatter.Reply, error) {
 	if len(seq) != 0 {
 		ask := seq[len(seq)-1].String()
 		deb.w.Write([]byte("\n>>>>>\n" + ask + "\n"))
@@ -40,7 +40,7 @@ func (deb *Logger) Prompt(ctx context.Context, seq []fmt.Stringer, opt ...chatte
 	if err != nil {
 		deb.w.Write([]byte("FAIL:\n\t" + err.Error() + "\n"))
 	} else {
-		deb.w.Write([]byte("\n<<<<<\n" + reply.Text + "\n"))
+		deb.w.Write([]byte("\n<<<<<\n" + reply.String() + "\n"))
 	}
 
 	return reply, err

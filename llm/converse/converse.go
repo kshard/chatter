@@ -247,6 +247,14 @@ func toMessage(msg fmt.Stringer) (types.Message, error) {
 		}
 		return msg, nil
 
+	case *chatter.Prompt:
+		return types.Message{
+			Role: types.ConversationRoleUser,
+			Content: []types.ContentBlock{
+				&types.ContentBlockMemberText{Value: v.String()},
+			},
+		}, nil
+
 	case chatter.Prompt:
 		return types.Message{
 			Role: types.ConversationRoleUser,

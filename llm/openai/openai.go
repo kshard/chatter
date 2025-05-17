@@ -49,11 +49,10 @@ func New(opt ...Option) (*Client, error) {
 	return &api, api.checkRequired()
 }
 
-func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
-func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
+func (c *Client) Usage() chatter.Usage { return c.usage }
 
 // Send prompt
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (reply *chatter.Reply, err error) {
+func (c *Client) Prompt(ctx context.Context, prompt []chatter.Message, opts ...chatter.Opt) (reply *chatter.Reply, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
@@ -99,8 +98,8 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 		return
 	}
 
-	c.usedInputTokens += bag.Usage.PromptTokens
-	c.usedReplyTokens += bag.Usage.OutputTokens
+	c.usage.InputTokens += bag.Usage.PromptTokens
+	c.usage.ReplyTokens += bag.Usage.OutputTokens
 
 	if len(bag.Choices) == 0 {
 		err = errors.New("empty response")
@@ -109,9 +108,7 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 
 	reply = &chatter.Reply{
 		Content: []chatter.Content{
-			chatter.ContentText{
-				Text: bag.Choices[0].Message.Content,
-			},
+			chatter.Text(bag.Choices[0].Message.Content),
 		},
 		Usage: chatter.Usage{
 			InputTokens: bag.Usage.PromptTokens,

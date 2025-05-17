@@ -36,7 +36,7 @@ const (
 
 func (v Llama3) ModelID() string { return string(v) }
 
-func (v Llama3) Encode(prompt []fmt.Stringer, opts ...chatter.Opt) (req []byte, err error) {
+func (v Llama3) Encode(prompt []chatter.Message, opts ...chatter.Opt) (req []byte, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
@@ -97,9 +97,7 @@ func (Llama3) Decode(data []byte) (r chatter.Reply, err error) {
 	}
 
 	r.Content = []chatter.Content{
-		chatter.ContentText{
-			Text: reply.Text,
-		},
+		chatter.Text(reply.Text),
 	}
 	r.Usage.InputTokens = reply.UsedPromptTokens
 	r.Usage.ReplyTokens = reply.UsedTextTokens

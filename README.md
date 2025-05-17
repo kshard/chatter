@@ -177,38 +177,35 @@ prompt.WithTask("Translate the following text")
 
 // Creates a guide section with the given note and text.
 // It is complementary paragraph to the task.
-prompt.With(chatter.Guide("Please translate the text accurately"))
+prompt.WithGuide("Please translate the text accurately")
 
 // Creates a rules / requirements section with the given note and text.
-prompt.With(chatter.Rules(
+prompt.WithRules(
   "Strictly adhere to the following requirements when generating a response.",
   "Do not use any slang or informal language",
   "Do not invent new, unkown words",
-))
+)
 
 // Creates a feedback section with the given note and text.
-prompt.With(chatter.Feedback(
+prompt.WithFeedback(
   "Improve the response based on feedback",
   "Previous translations were too literal.",
-))
+)
 
 // Create example of input and expected output.
-prompt.With(chatter.Example{
-  Input: `["Hello"]`,
-  Reply: `["Hola"]`
-})
+prompt.WithExample(`["Hello"]`, `["Hola"]`)
 
 // Creates a context section with the given note and text.
-prompt.With(chatter.Context(
+prompt.WithContext(
   "Below are additional context relevant to your goal task.",
   "The text is a formal letter",
-))
+)
 
 // Creates an input section with the given note and text.
-prompt.With(chatter.Input(
+prompt.WithInput(
   "Translate the following sentence",
   "Hello, how are you?",
-))
+)
 ```
 
 
@@ -245,3 +242,9 @@ If you experience any issues with the library, please let us know via [GitHub is
 
 [![See LICENSE](https://img.shields.io/github/license/kshard/chatter.svg?style=for-the-badge)](LICENSE)
 
+
+## Reference
+1. [Use a tool to complete an Amazon Bedrock model response](https://docs.aws.amazon.com/bedrock/latest/userguide/tool-use.html)
+2. [Converse API tool use examples](https://docs.aws.amazon.com/bedrock/latest/userguide/tool-use-examples.html)
+3. [Call a tool with the Converse API](https://docs.aws.amazon.com/bedrock/latest/userguide/tool-use-inference-call.html)
+  

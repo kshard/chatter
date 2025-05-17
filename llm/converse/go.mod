@@ -7,7 +7,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.30.0
 	github.com/fogfish/opts v0.0.5
-	github.com/kshard/chatter v0.6.1
+	github.com/kshard/chatter v0.7.0
 )
 
 require (
@@ -22,7 +22,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.25.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 // indirect
-	github.com/aws/smithy-go v1.22.2 // indirect
+	github.com/aws/smithy-go v1.22.3 // indirect
 	github.com/fogfish/golem/hseq v1.3.0 // indirect
 	github.com/fogfish/golem/optics v0.14.0 // indirect
 )

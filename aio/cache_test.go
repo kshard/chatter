@@ -23,7 +23,7 @@ func TestCache(t *testing.T) {
 		&chatter.Reply{
 			Stage: chatter.LLM_RETURN,
 			Content: []chatter.Content{
-				chatter.ContentText{Text: "test"},
+				chatter.Text("test"),
 			},
 		},
 	})

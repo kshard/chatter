@@ -57,7 +57,7 @@ func (c *Cache) HashKey(prompt string) []byte {
 	return hash.Sum(nil)
 }
 
-func (c *Cache) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
+func (c *Cache) Prompt(ctx context.Context, prompt []chatter.Message, opts ...chatter.Opt) (*chatter.Reply, error) {
 	if len(prompt) == 0 {
 		return nil, fmt.Errorf("bad request, empty prompt")
 	}
@@ -72,7 +72,7 @@ func (c *Cache) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatt
 		return &chatter.Reply{
 			Stage: chatter.LLM_RETURN,
 			Content: []chatter.Content{
-				chatter.ContentText{Text: string(val)},
+				chatter.Text(string(val)),
 			},
 		}, nil
 	}

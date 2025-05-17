@@ -10,7 +10,6 @@ package aio
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/kshard/chatter"
@@ -38,7 +37,7 @@ func NewLimiter(requestPerMin int, tokensPerMin int, chatter chatter.Chatter) *L
 	}
 }
 
-func (c *Limiter) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
+func (c *Limiter) Prompt(ctx context.Context, prompt []chatter.Message, opts ...chatter.Opt) (*chatter.Reply, error) {
 	if err := c.rps.Wait(ctx); err != nil {
 		return nil, err
 	}
@@ -58,8 +57,8 @@ func (c *Limiter) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...cha
 		slog.Float64("budget", c.tps.Tokens()),
 		slog.Int("debt", c.debt),
 		slog.Group("session",
-			slog.Int("inputTokens", c.Chatter.UsedInputTokens()),
-			slog.Int("replyTokens", c.Chatter.UsedReplyTokens()),
+			slog.Int("inputTokens", c.Chatter.Usage().InputTokens),
+			slog.Int("replyTokens", c.Chatter.Usage().ReplyTokens),
 		),
 		slog.Group("prompt",
 			slog.Int("inputTokens", reply.Usage.InputTokens),

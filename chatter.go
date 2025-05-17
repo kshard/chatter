@@ -10,16 +10,21 @@ package chatter
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 )
 
 type Opt = interface{ ChatterOpt() }
 
 // The generic trait to "interact" with LLMs;
 type Chatter interface {
-	UsedInputTokens() int
-	UsedReplyTokens() int
-	Prompt(context.Context, []fmt.Stringer, ...Opt) (*Reply, error)
+	Usage() Usage
+	Prompt(context.Context, []Message, ...Opt) (*Reply, error)
+}
+
+// LLM Usage stats
+type Usage struct {
+	InputTokens int `json:"inputTokens"`
+	ReplyTokens int `json:"replyTokens"`
 }
 
 // LLMs' critical parameter influencing the balance between predictability
@@ -55,3 +60,31 @@ func (StopSequence) ChatterOpt() {}
 type Registry []Cmd
 
 func (Registry) ChatterOpt() {}
+
+// Command descriptor
+type Cmd struct {
+	// [Required] A unique name for the command, used as a reference by LLMs (e.g., "bash").
+	Cmd string `json:"cmd"`
+
+	// [Required] A detailed, multi-line description to educate the LLM on command usage.
+	// Provides contextual information on how and when to use the command.
+	About string `json:"about"`
+
+	// [Required] JSON Schema specifies arguments, types, and additional context
+	// to guide the LLM on command invokation.
+	Schema json.RawMessage `json:"schema"`
+}
+
+// Foundational identity of LLMs
+type LLM interface {
+	// Model ID as defined by the vendor
+	ModelID() string
+
+	// Encode prompt to bytes:
+	// - encoding prompt as prompt markup supported by LLM
+	// - encoding prompt to envelop supported by LLM's hosting platform
+	Encode([]Message, ...Opt) ([]byte, error)
+
+	// Decode LLM's reply into pure text
+	Decode([]byte) (Reply, error)
+}

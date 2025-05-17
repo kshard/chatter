@@ -8,4 +8,4 @@
 
 package autoconfig
 
-const Version = "llm/autoconfig/v0.0.5"
+const Version = "llm/autoconfig/v0.1.0"

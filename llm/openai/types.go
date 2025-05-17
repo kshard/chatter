@@ -17,6 +17,7 @@ import (
 	ø "github.com/fogfish/gurl/v2/http/send"
 	"github.com/fogfish/opts"
 	"github.com/jdxcode/netrc"
+	"github.com/kshard/chatter"
 )
 
 type LLM string
@@ -90,12 +91,11 @@ func withNetRC(h *Client, host string) error {
 // OpenAI client
 type Client struct {
 	http.Stack
-	host            ø.Authority
-	secret          string
-	roleSystem      string
-	llm             LLM
-	usedInputTokens int
-	usedReplyTokens int
+	host       ø.Authority
+	secret     string
+	roleSystem string
+	llm        LLM
+	usage      chatter.Usage
 }
 
 // See https://platform.openai.com/docs/api-reference/chat/create

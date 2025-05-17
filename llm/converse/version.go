@@ -8,4 +8,4 @@
 
 package converse
 
-const Version = "llm/converse/v0.0.3"
+const Version = "llm/converse/v0.1.0"

@@ -34,7 +34,7 @@ const (
 
 func (v Titan) ModelID() string { return string(v) }
 
-func (Titan) Encode(prompt []fmt.Stringer, opts ...chatter.Opt) (req []byte, err error) {
+func (Titan) Encode(prompt []chatter.Message, opts ...chatter.Opt) (req []byte, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
@@ -105,9 +105,7 @@ func (Titan) Decode(data []byte) (r chatter.Reply, err error) {
 		r.Usage.ReplyTokens += text.UsedTextTokens
 	}
 	r.Content = []chatter.Content{
-		chatter.ContentText{
-			Text: sb.String(),
-		},
+		chatter.Text(sb.String()),
 	}
 
 	return

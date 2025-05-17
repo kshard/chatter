@@ -10,7 +10,6 @@ package bedrock
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockruntime"
@@ -20,10 +19,9 @@ import (
 
 // AWS Bedrock client
 type Client struct {
-	api             Bedrock
-	llm             LLM
-	usedInputTokens int
-	usedReplyTokens int
+	api   Bedrock
+	llm   LLM
+	usage chatter.Usage
 }
 
 var _ chatter.Chatter = (*Client)(nil)
@@ -47,11 +45,10 @@ func New(opt ...Option) (*Client, error) {
 	return &c, c.checkRequired()
 }
 
-func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
-func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
+func (c *Client) Usage() chatter.Usage { return c.usage }
 
 // Prompt the model
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
+func (c *Client) Prompt(ctx context.Context, prompt []chatter.Message, opts ...chatter.Opt) (*chatter.Reply, error) {
 	req, err := c.llm.Encode(prompt, opts...)
 	if err != nil {
 		return nil, err
@@ -73,8 +70,8 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 		return nil, err
 	}
 
-	c.usedInputTokens += reply.Usage.InputTokens
-	c.usedReplyTokens += reply.Usage.ReplyTokens
+	c.usage.InputTokens += reply.Usage.InputTokens
+	c.usage.ReplyTokens += reply.Usage.ReplyTokens
 
 	return &reply, nil
 }

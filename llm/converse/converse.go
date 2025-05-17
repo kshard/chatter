@@ -29,11 +29,11 @@ type Bedrock interface {
 }
 
 type Client struct {
-	api             Bedrock
-	llm             LLM
-	registry        chatter.Registry
-	usedInputTokens int
-	usedReplyTokens int
+	api      Bedrock
+	llm      LLM
+	registry chatter.Registry
+	usage    chatter.Usage
+	tools    *types.ToolConfiguration
 }
 
 func New(opt ...Option) (*Client, error) {
@@ -49,14 +49,20 @@ func New(opt ...Option) (*Client, error) {
 		}
 	}
 
-	return &c, c.checkRequired()
+	if len(c.registry) > 0 {
+		reg, err := toToolConfig(c.registry)
+		if err != nil {
+			return nil, err
+		}
+		c.tools = reg
+	}
 
+	return &c, c.checkRequired()
 }
 
-func (c *Client) UsedInputTokens() int { return c.usedInputTokens }
-func (c *Client) UsedReplyTokens() int { return c.usedReplyTokens }
+func (c *Client) Usage() chatter.Usage { return c.usage }
 
-func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (reply *chatter.Reply, err error) {
+func (c *Client) Prompt(ctx context.Context, prompt []chatter.Message, opts ...chatter.Opt) (reply *chatter.Reply, err error) {
 	if len(prompt) == 0 {
 		err = fmt.Errorf("bad request, empty prompt")
 		return
@@ -67,14 +73,7 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 		ModelId:         (*string)(&c.llm),
 		Messages:        make([]types.Message, 0),
 		System:          make([]types.SystemContentBlock, 0),
-	}
-
-	if len(c.registry) > 0 {
-		reg, err := toToolConfig(c.registry)
-		if err != nil {
-			return nil, err
-		}
-		inquiry.ToolConfig = reg
+		ToolConfig:      c.tools,
 	}
 
 	for _, opt := range opts {
@@ -88,11 +87,13 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 		case chatter.StopSequence:
 			inquiry.InferenceConfig.StopSequences = []string{string(v)}
 		case chatter.Registry:
-			reg, err := toToolConfig(v)
-			if err != nil {
-				return nil, err
+			if len(v) > 0 {
+				reg, err := toToolConfig(v)
+				if err != nil {
+					return nil, err
+				}
+				inquiry.ToolConfig = reg
 			}
-			inquiry.ToolConfig = reg
 		}
 	}
 
@@ -127,16 +128,88 @@ func (c *Client) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chat
 	if result.Usage != nil {
 		if result.Usage.InputTokens != nil {
 			r.Usage.InputTokens = int(*result.Usage.InputTokens)
-			c.usedInputTokens += int(*result.Usage.InputTokens)
+			c.usage.InputTokens += int(*result.Usage.InputTokens)
 		}
 		if result.Usage.OutputTokens != nil {
 			r.Usage.ReplyTokens = int(*result.Usage.OutputTokens)
-			c.usedReplyTokens += int(*result.Usage.OutputTokens)
+			c.usage.ReplyTokens += int(*result.Usage.OutputTokens)
 		}
 	}
 
 	return &r, nil
+}
 
+func toMessage(msg chatter.Message) (types.Message, error) {
+	switch v := (msg).(type) {
+	case chatter.Reply:
+		return fromReply(&v)
+	case *chatter.Reply:
+		return fromReply(v)
+	case chatter.Answer:
+		return fromAnswer(&v)
+	case *chatter.Answer:
+		return fromAnswer(v)
+	case *chatter.Prompt:
+		return fromPrompt(v)
+	}
+
+	return types.Message{}, fmt.Errorf("invalid content block")
+}
+
+func fromReply(reply *chatter.Reply) (types.Message, error) {
+	msg := types.Message{
+		Role:    types.ConversationRoleAssistant,
+		Content: []types.ContentBlock{},
+	}
+
+	for _, block := range reply.Content {
+		switch v := (block).(type) {
+		case chatter.Text:
+			msg.Content = append(msg.Content, &types.ContentBlockMemberText{Value: string(v)})
+		case interface{ RawMessage() any }:
+			if cb, ok := v.RawMessage().(types.ContentBlock); ok {
+				msg.Content = append(msg.Content, cb)
+			}
+		}
+	}
+	return msg, nil
+}
+
+func fromAnswer(answer *chatter.Answer) (types.Message, error) {
+	msg := types.Message{
+		Role:    types.ConversationRoleUser,
+		Content: []types.ContentBlock{},
+	}
+	for _, yield := range answer.Yield {
+		var reply any
+		if err := json.Unmarshal(yield.Value, &reply); err != nil {
+			return types.Message{}, err
+		}
+		msg.Content = append(msg.Content, &types.ContentBlockMemberToolResult{
+			Value: types.ToolResultBlock{
+				ToolUseId: aws.String(yield.ID),
+				Content: []types.ToolResultContentBlock{
+					&types.ToolResultContentBlockMemberJson{
+						Value: document.NewLazyDocument(
+							map[string]any{
+								"json": reply,
+							},
+						),
+					},
+				},
+			},
+		})
+	}
+	return msg, nil
+}
+
+func fromPrompt(prompt *chatter.Prompt) (types.Message, error) {
+	return types.Message{
+		Role: types.ConversationRoleUser,
+		Content: []types.ContentBlock{
+			&types.ContentBlockMemberText{Value: prompt.String()},
+		},
+	}, nil
 }
 
 func toStage(reason types.StopReason) chatter.Stage {
@@ -157,7 +230,7 @@ func toStage(reason types.StopReason) chatter.Stage {
 func toContent(block types.ContentBlock) (chatter.Content, error) {
 	switch v := block.(type) {
 	case *types.ContentBlockMemberText:
-		return chatter.ContentText{Text: v.Value}, nil
+		return chatter.Text(v.Value), nil
 
 	case *types.ContentBlockMemberToolUse:
 		in, err := v.Value.Input.MarshalSmithyDocument()
@@ -166,9 +239,9 @@ func toContent(block types.ContentBlock) (chatter.Content, error) {
 		}
 		return chatter.Invoke{
 			Name: aws.ToString(v.Value.Name),
-			Args: chatter.ContentJson{
-				Source: aws.ToString(v.Value.ToolUseId),
-				Value:  in,
+			Args: chatter.Json{
+				ID:    aws.ToString(v.Value.ToolUseId),
+				Value: in,
 			},
 			Message: v,
 		}, nil
@@ -197,71 +270,6 @@ func toReply(out types.ConverseOutput) (reply chatter.Reply, err error) {
 	}
 
 	return
-}
-
-func toMessage(msg fmt.Stringer) (types.Message, error) {
-	switch v := (msg).(type) {
-	case *chatter.Reply:
-		msg := types.Message{
-			Role:    types.ConversationRoleAssistant,
-			Content: []types.ContentBlock{},
-		}
-		for _, block := range v.Content {
-			switch b := (block).(type) {
-			case chatter.ContentText:
-				msg.Content = append(msg.Content, &types.ContentBlockMemberText{Value: b.Text})
-			case interface{ RawMessage() any }:
-				if cb, ok := b.RawMessage().(types.ContentBlock); ok {
-					msg.Content = append(msg.Content, cb)
-				}
-			}
-		}
-		return msg, nil
-	case chatter.Answer:
-		msg := types.Message{
-			Role:    types.ConversationRoleUser,
-			Content: []types.ContentBlock{},
-		}
-		for _, yield := range v.Yield {
-			var reply any
-			if err := json.Unmarshal(yield.Value, &reply); err != nil {
-				return types.Message{}, err
-			}
-			msg.Content = append(msg.Content, &types.ContentBlockMemberToolResult{
-				Value: types.ToolResultBlock{
-					ToolUseId: aws.String(yield.Source),
-					Content: []types.ToolResultContentBlock{
-						&types.ToolResultContentBlockMemberJson{
-							Value: document.NewLazyDocument(
-								map[string]any{
-									"json": reply,
-								},
-							),
-						},
-					},
-				},
-			})
-		}
-		return msg, nil
-
-	case *chatter.Prompt:
-		return types.Message{
-			Role: types.ConversationRoleUser,
-			Content: []types.ContentBlock{
-				&types.ContentBlockMemberText{Value: v.String()},
-			},
-		}, nil
-
-	case chatter.Prompt:
-		return types.Message{
-			Role: types.ConversationRoleUser,
-			Content: []types.ContentBlock{
-				&types.ContentBlockMemberText{Value: v.String()},
-			},
-		}, nil
-	}
-
-	return types.Message{}, fmt.Errorf("invalid content block")
 }
 
 func toToolConfig(registry chatter.Registry) (*types.ToolConfiguration, error) {

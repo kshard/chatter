@@ -25,7 +25,7 @@ type Content interface{ fmt.Stringer }
 // Plain text
 type Text string
 
-func (t Text) IsaMessage()    {}
+func (t Text) HKT1(Message)   {}
 func (t Text) String() string { return string(t) }
 
 // Json object
@@ -56,7 +56,7 @@ func (inv Invoke) RawMessage() any { return inv.Message }
 // Text content
 type Task string
 
-func (t Task) IsaMessage()    {}
+func (t Task) HKT1(Message)   {}
 func (t Task) String() string { return string(t) }
 
 // Guide LLM on how to complete the task.

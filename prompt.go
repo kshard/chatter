@@ -23,7 +23,7 @@ import (
 type Stratum string
 
 // Stratum is LLM Message
-func (Stratum) IsaMessage() {}
+func (Stratum) HKT1(Message) {}
 
 func (s Stratum) String() string { return string(s) }
 
@@ -49,12 +49,10 @@ type Prompt struct {
 	Content []Content `json:"content,omitempty"`
 }
 
-var (
-	_ Message = (*Prompt)(nil)
-)
+var _ Message = (*Prompt)(nil)
 
 // Prompt is LLM Message
-func (*Prompt) IsaMessage() {}
+func (*Prompt) HKT1(Message) {}
 
 // Add Content block into LLM's prompt
 func (prompt *Prompt) With(block Content) *Prompt {

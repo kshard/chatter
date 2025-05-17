@@ -17,7 +17,7 @@ import (
 // Message is an abstract LLM I/O element
 type Message interface {
 	fmt.Stringer
-	IsaMessage()
+	HKT1(Message)
 }
 
 // Stage of the interaction with LLM
@@ -44,7 +44,9 @@ type Reply struct {
 	Content []Content `json:"content"`
 }
 
-func (Reply) IsaMessage() {}
+var _ Message = (*Reply)(nil)
+
+func (Reply) HKT1(Message) {}
 
 func (reply Reply) String() string {
 	seq := make([]string, 0)
@@ -83,6 +85,8 @@ type Answer struct {
 	Yield []Json `json:"yield,omitempty"`
 }
 
-func (Answer) IsaMessage() {}
+var _ Message = (*Reply)(nil)
+
+func (Answer) HKT1(Message) {}
 
 func (Answer) String() string { return "" }

@@ -10,7 +10,6 @@ package aio_test
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kshard/chatter"
 )
@@ -19,9 +18,8 @@ type mock struct {
 	reply *chatter.Reply
 }
 
-func (mock mock) UsedInputTokens() int { return mock.reply.Usage.InputTokens }
-func (mock mock) UsedReplyTokens() int { return mock.reply.Usage.ReplyTokens }
+func (mock mock) Usage() chatter.Usage { return mock.reply.Usage }
 
-func (mock mock) Prompt(context.Context, []fmt.Stringer, ...chatter.Opt) (*chatter.Reply, error) {
+func (mock mock) Prompt(context.Context, []chatter.Message, ...chatter.Opt) (*chatter.Reply, error) {
 	return mock.reply, nil
 }

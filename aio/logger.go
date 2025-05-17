@@ -10,7 +10,7 @@ package aio
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 	"io"
 
 	"github.com/kshard/chatter"
@@ -19,29 +19,72 @@ import (
 // Logger of LLM's I/O
 type Logger struct {
 	chatter.Chatter
-	w io.Writer
+	w          io.Writer
+	jsonFormat bool
 }
 
-// Create new debugger session
-func NewLogger(w io.Writer, chatter chatter.Chatter) *Logger {
+func NewTextLogger(w io.Writer, chatter chatter.Chatter) *Logger {
 	return &Logger{
-		Chatter: chatter,
-		w:       w,
+		Chatter:    chatter,
+		w:          w,
+		jsonFormat: false,
 	}
 }
 
-func (deb *Logger) Prompt(ctx context.Context, seq []fmt.Stringer, opt ...chatter.Opt) (*chatter.Reply, error) {
+func NewJsonLogger(w io.Writer, chatter chatter.Chatter) *Logger {
+	return &Logger{
+		Chatter:    chatter,
+		w:          w,
+		jsonFormat: true,
+	}
+}
+
+func (deb *Logger) Prompt(ctx context.Context, seq []chatter.Message, opt ...chatter.Opt) (*chatter.Reply, error) {
 	if len(seq) != 0 {
-		ask := seq[len(seq)-1].String()
-		deb.w.Write([]byte("\n>>>>>\n" + ask + "\n"))
+		ask := seq[len(seq)-1]
+		deb.logEgress(ask)
 	}
 
 	reply, err := deb.Chatter.Prompt(ctx, seq, opt...)
 	if err != nil {
 		deb.w.Write([]byte("FAIL:\n\t" + err.Error() + "\n"))
 	} else {
-		deb.w.Write([]byte("\n<<<<<\n" + reply.String() + "\n"))
+		deb.logIngress(reply)
 	}
 
 	return reply, err
+}
+
+func (deb *Logger) logEgress(msg chatter.Message) {
+	deb.w.Write([]byte("\n>>>>>\n"))
+
+	if !deb.jsonFormat {
+		deb.w.Write([]byte(msg.String()))
+		deb.w.Write([]byte("\n"))
+		return
+	}
+
+	b, err := json.MarshalIndent(msg, "|", "  ")
+	if err == nil {
+		deb.w.Write([]byte("|"))
+		deb.w.Write(b)
+		deb.w.Write([]byte("\n"))
+	}
+}
+
+func (deb *Logger) logIngress(msg *chatter.Reply) {
+	deb.w.Write([]byte("\n<<<<<\n"))
+
+	if !deb.jsonFormat {
+		deb.w.Write([]byte(msg.String()))
+		deb.w.Write([]byte("\n"))
+		return
+	}
+
+	b, err := json.MarshalIndent(msg, "|", "  ")
+	if err == nil {
+		deb.w.Write([]byte("|"))
+		deb.w.Write(b)
+		deb.w.Write([]byte("\n"))
+	}
 }

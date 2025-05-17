@@ -35,7 +35,7 @@ func TestPromptWithTask(t *testing.T) {
 	p.WithTask(v)
 
 	it.Then(t).Should(
-		it.Equal(p.Task, e),
+		it.Equal(string(p.Task), e),
 		it.Equal(p.String(), e),
 	)
 }
@@ -45,10 +45,10 @@ func TestPromptWithGuide(t *testing.T) {
 	e := v + "."
 
 	p := &Prompt{}
-	p.With(Guide("", v))
+	p.WithGuide("", v)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: TEXT, Note: "", Text: []string{e}}),
+		it.Seq(p.Content).Equal(Guide{Note: "", Text: []string{e}}),
 		it.Equal(p.String(), e),
 	)
 }
@@ -58,10 +58,10 @@ func TestPromptWithRules1(t *testing.T) {
 	e := "1. " + v + "."
 
 	p := &Prompt{}
-	p.With(Rules("", v))
+	p.WithRules("", v)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: RULES, Note: "", Text: []string{v + "."}}),
+		it.Seq(p.Content).Equal(Rules{Note: "", Text: []string{v + "."}}),
 		it.Equal(p.String(), e),
 	)
 }
@@ -71,10 +71,10 @@ func TestPromptWithRules2(t *testing.T) {
 	y := "Translate all text"
 
 	p := &Prompt{}
-	p.With(Rules(v, y, y))
+	p.WithRules(v, y, y)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: RULES, Note: v + ":", Text: []string{y + ".", y + "."}}),
+		it.Seq(p.Content).Equal(Rules{Note: v + ":", Text: []string{y + ".", y + "."}}),
 		it.Equal(p.String(), fmt.Sprintf("%s:\n1. %s.\n2. %s.", v, y, y)),
 	)
 }
@@ -84,11 +84,11 @@ func TestPromptWithExample(t *testing.T) {
 	y := "Hola"
 
 	p := &Prompt{}
-	p.With(Example{Input: v, Reply: y})
+	p.WithExample(v, y)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Example{Input: v, Reply: y}),
-		it.Equal(p.String(), fmt.Sprintf("Example Input: %s\nExpected Output: %s", v, y)),
+		it.Seq(p.Content).Equal(Example{Input: v, Reply: y}),
+		it.Equal(p.String(), fmt.Sprintf("Example Input:\n%s\nExpected Output:\n%s\n\n", v, y)),
 	)
 }
 
@@ -98,25 +98,24 @@ func TestPromptWithInput(t *testing.T) {
 	w := "World"
 
 	p := &Prompt{}
-	p.With(Input(a, h, w))
+	p.WithInput(a, h, w)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: INPUT, Note: a + ":", Text: []string{h, w}}),
+		it.Seq(p.Content).Equal(Input{Note: a + ":", Text: []string{h, w}}),
 		it.Equal(p.String(), fmt.Sprintf("%s:\n- %s.\n- %s.", a, h, w)),
 	)
 }
 
 func TestPromptWithAttach(t *testing.T) {
 	a := "Translate the following"
-	h := "Hello"
-	w := "World"
+	h := "Hello World"
 
 	p := &Prompt{}
-	p.With(Blob(a, h, w))
+	p.WithBlob(a, h)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: BLOB, Note: a + ":", Text: []string{h, w}}),
-		it.Equal(p.String(), fmt.Sprintf("%s:\n%s\n%s\n", a, h, w)),
+		it.Seq(p.Content).Equal(Blob{Note: a + ":", Text: h}),
+		it.Equal(p.String(), fmt.Sprintf("%s:\n%s\n", a, h)),
 	)
 }
 
@@ -126,10 +125,10 @@ func TestPromptWithContext(t *testing.T) {
 	w := "World"
 
 	p := &Prompt{}
-	p.With(Context(a, h, w))
+	p.WithContext(a, h, w)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: CONTEXT, Note: a + ":", Text: []string{h, w}}),
+		it.Seq(p.Content).Equal(Context{Note: a + ":", Text: []string{h, w}}),
 		it.Equal(p.String(), fmt.Sprintf("%s:\n- %s.\n- %s.", a, h, w)),
 	)
 }
@@ -140,10 +139,10 @@ func TestPromptWithFeedback(t *testing.T) {
 	w := "World"
 
 	p := &Prompt{}
-	p.With(Feedback(a, h, w))
+	p.WithFeedback(a, h, w)
 
 	it.Then(t).Should(
-		it.Seq(p.Sections).Equal(Snippet{Type: FEEDBACK, Note: a + ":", Text: []string{h + ".", w + "."}}),
+		it.Seq(p.Content).Equal(Feedback{Note: a + ":", Text: []string{h + ".", w + "."}}),
 		it.Equal(p.String(), fmt.Sprintf("%s:\n- %s.\n- %s.", a, h, w)),
 	)
 }

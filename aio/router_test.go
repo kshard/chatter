@@ -20,12 +20,12 @@ import (
 func TestProxy_Prompt(t *testing.T) {
 	llms := map[string]chatter.Chatter{
 		"model1": &mock{&chatter.Reply{
-			Content: []chatter.Content{chatter.ContentText{Text: "model1"}},
+			Content: []chatter.Content{chatter.Text("model1")},
 			Usage:   chatter.Usage{InputTokens: 10, ReplyTokens: 20},
 		}},
 	}
 	fallback := &mock{&chatter.Reply{
-		Content: []chatter.Content{chatter.ContentText{Text: "fallback"}},
+		Content: []chatter.Content{chatter.Text("fallback")},
 		Usage:   chatter.Usage{InputTokens: 5, ReplyTokens: 15},
 	}}
 	p := aio.NewRouter(llms, fallback)
@@ -59,5 +59,4 @@ func TestProxy_Prompt(t *testing.T) {
 			it.Equal(reply.String(), "fallback"),
 		)
 	})
-
 }

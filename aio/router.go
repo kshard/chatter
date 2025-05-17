@@ -10,7 +10,6 @@ package aio
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kshard/chatter"
 )
@@ -38,10 +37,9 @@ func NewRouter(llms map[string]chatter.Chatter, fallback chatter.Chatter) *Route
 	}
 }
 
-func (p *Router) UsedInputTokens() int { return p.usage.InputTokens }
-func (p *Router) UsedReplyTokens() int { return p.usage.ReplyTokens }
+func (p *Router) Usage() chatter.Usage { return p.usage }
 
-func (p *Router) Prompt(ctx context.Context, prompt []fmt.Stringer, opts ...chatter.Opt) (*chatter.Reply, error) {
+func (p *Router) Prompt(ctx context.Context, prompt []chatter.Message, opts ...chatter.Opt) (*chatter.Reply, error) {
 	llm := p.fallback
 
 	for _, opt := range opts {

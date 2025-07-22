@@ -49,12 +49,12 @@ type Quota int
 
 func (Quota) ChatterOpt() {}
 
-// The stop sequence prevents LLMsfrom generating more text after a specific
+// The stop sequence prevents LLMs from generating more text after a specific
 // string appears. Stop sequences make it easy to guarantee concise,
 // controlled responses from models.
-type StopSequence string
+type StopSequences []string
 
-func (StopSequence) ChatterOpt() {}
+func (StopSequences) ChatterOpt() {}
 
 // Command registry is a sequence of tools available for LLM usage.
 type Registry []Cmd

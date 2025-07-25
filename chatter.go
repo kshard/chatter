@@ -44,10 +44,14 @@ type TopP float64
 
 func (TopP) ChatterOpt() {}
 
-// Token quota for reply, the model would limit response given number
-type Quota int
+type TopK float64
 
-func (Quota) ChatterOpt() {}
+func (TopK) ChatterOpt() {}
+
+// Token quota for reply, the model would limit response given number
+type MaxTokens int
+
+func (MaxTokens) ChatterOpt() {}
 
 // The stop sequence prevents LLMs from generating more text after a specific
 // string appears. Stop sequences make it easy to guarantee concise,

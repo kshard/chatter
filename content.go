@@ -34,6 +34,12 @@ type Text string
 func (t Text) HKT1(Message)   {}
 func (t Text) String() string { return string(t) }
 
+func (t Text) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Text string `json:"text,omitempty"`
+	}{Text: string(t)})
+}
+
 // Json is a structured object (JSON object) that can be used as input to LLMs
 // or as a reply from LLMs.
 //
@@ -223,5 +229,8 @@ type Vector []float32
 
 func (v Vector) String() string { return fmt.Sprintf("%v", []float32(v)) }
 
-// TODO: fix Vector !?
-// Make it cachable
+func (v Vector) MarshalJSON() ([]byte, error) {
+	return json.Marshal(struct {
+		Vector []float32 `json:"vector,omitempty"`
+	}{Vector: []float32(v)})
+}

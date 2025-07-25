@@ -1,3 +1,11 @@
+//
+// Copyright (C) 2024 Dmitry Kolesnikov
+//
+// This file may be modified and distributed under the terms
+// of the MIT license.  See the LICENSE file for details.
+// https://github.com/kshard/chatter
+//
+
 package provider
 
 import (
@@ -8,43 +16,54 @@ import (
 	"github.com/kshard/chatter"
 )
 
+//
+// Provider is a generic interface for LLMs providers.
+// It defines a basic contract for LLMs adapters, allowing to focus on
+// implementation of LLMs protocols and their encoder/decoder.
+//
+
 const (
 	ErrBadRequest = faults.Type("bad request")
 	ErrServiceIO  = faults.Type("service IO error")
 )
 
+// Encoder Factory is a function that creates an instance of LLM request.
 type Factory[A any] func() (Encoder[A], error)
 
-type Inferrer interface {
-	WithTemperature(float64)
-	WithTopP(float64)
-	WithMaxTokens(int)
-	WithStopSequences([]string)
-	WithCommand(chatter.Cmd)
+// Inferrer is a set of parameters that influence the LLM's inference behavior.
+type Inferrer struct {
+	Temperature   float64
+	TopP          float64
+	TopK          float64
+	MaxTokens     int
+	StopSequences []string
 }
 
-type Prompter interface {
+// LLM request encoder.
+type Encoder[A any] interface {
+	WithInferrer(Inferrer)
+	WithCommand(chatter.Cmd)
+
 	AsStratum(chatter.Stratum) error
 	AsText(chatter.Text) error
 	AsPrompt(*chatter.Prompt) error
 	AsAnswer(*chatter.Answer) error
 	AsReply(*chatter.Reply) error
-}
 
-type Encoder[A any] interface {
-	Inferrer
-	Prompter
 	Build() A
 }
 
+// LLM response decoder.
 type Decoder[B any] interface {
 	Decode(B) (*chatter.Reply, error)
 }
 
+// Service is a generic I/O for LLMs provider.
 type Service[A, B any] interface {
 	Invoke(context.Context, A) (B, error)
 }
 
+// Provider is a generic implementation of Chatter interface.
 type Provider[A, B any] struct {
 	factory Factory[A]
 	decoder Decoder[B]
@@ -52,6 +71,8 @@ type Provider[A, B any] struct {
 
 	usage chatter.Usage
 }
+
+var _ chatter.Chatter = (*Provider[any, any])(nil)
 
 func New[A, B any](
 	factory Factory[A],
@@ -77,21 +98,29 @@ func (p *Provider[A, B]) Prompt(ctx context.Context, prompt []chatter.Message, o
 		return nil, ErrBadRequest.With(err)
 	}
 
-	for _, opt := range opts {
-		switch v := opt.(type) {
-		case chatter.Temperature:
-			input.WithTemperature(float64(v))
-		case chatter.TopP:
-			input.WithTopP(float64(v))
-		case chatter.Quota:
-			input.WithMaxTokens(int(v))
-		case chatter.StopSequences:
-			input.WithStopSequences([]string(v))
-		case chatter.Registry:
-			for _, cmd := range v {
-				input.WithCommand(cmd)
+	if len(opts) > 0 {
+		var config Inferrer
+
+		for _, opt := range opts {
+			switch v := opt.(type) {
+			case chatter.Temperature:
+				config.Temperature = float64(v)
+			case chatter.TopP:
+				config.TopP = float64(v)
+			case chatter.TopK:
+				config.TopK = float64(v)
+			case chatter.MaxTokens:
+				config.MaxTokens = int(v)
+			case chatter.StopSequences:
+				config.StopSequences = make([]string, len(v))
+				copy(config.StopSequences, v)
+			case chatter.Registry:
+				for _, cmd := range v {
+					input.WithCommand(cmd)
+				}
 			}
 		}
+		input.WithInferrer(config)
 	}
 
 	for _, term := range prompt {

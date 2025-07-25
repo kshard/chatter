@@ -24,6 +24,7 @@ func TestCache(t *testing.T) {
 			Stage: chatter.LLM_RETURN,
 			Content: []chatter.Content{
 				chatter.Text("test"),
+				chatter.Vector{1.0, 2.0, 3.0},
 			},
 		},
 	})
@@ -32,7 +33,23 @@ func TestCache(t *testing.T) {
 	prompt.WithTask("Make me a test.")
 
 	c.Prompt(context.Background(), prompt.ToSeq())
-	c.Prompt(context.Background(), prompt.ToSeq())
+	reply, err := c.Prompt(context.Background(), prompt.ToSeq())
+
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if reply.Stage != chatter.LLM_RETURN {
+		t.Fatalf("unexpected stage: %s", reply.Stage)
+	}
+	if len(reply.Content) != 2 {
+		t.Fatalf("unexpected content length: %d", len(reply.Content))
+	}
+	if reply.Content[0].(chatter.Text) != "test" {
+		t.Fatalf("unexpected content[0]: %v", reply.Content[0])
+	}
+	if v, ok := reply.Content[1].(chatter.Vector); !ok || len(v) != 3 || v[0] != 1.0 || v[1] != 2.0 || v[2] != 3.0 {
+		t.Fatalf("unexpected content[1]: %v", reply.Content[1])
+	}
 
 	for k := range kv {
 		hkey := c.HashKey(prompt.String())

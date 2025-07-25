@@ -1,6 +1,6 @@
 module github.com/kshard/chatter/provider/bedrock
 
-go 1.24
+go 1.23
 
 replace github.com/kshard/chatter => ../../
 

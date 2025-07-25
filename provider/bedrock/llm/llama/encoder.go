@@ -23,20 +23,10 @@ func (codec *encoder) writeHeader(actor string) error {
 	return nil
 }
 
-func (codec *encoder) WithTemperature(temp float64) {
-	codec.req.Temperature = temp
-}
-
-func (codec *encoder) WithTopP(topP float64) {
-	codec.req.TopP = topP
-}
-
-func (codec *encoder) WithMaxTokens(maxTokens int) {
-	codec.req.MaxTokens = maxTokens
-}
-
-func (codec *encoder) WithStopSequences(sequences []string) {
-	// Llama3 doesn't support stop sequences in this bedrock implementation
+func (codec *encoder) WithInferrer(inferrer provider.Inferrer) {
+	codec.req.Temperature = inferrer.Temperature
+	codec.req.TopP = inferrer.TopP
+	codec.req.MaxTokens = inferrer.MaxTokens
 }
 
 func (codec *encoder) WithCommand(cmd chatter.Cmd) {

@@ -8,6 +8,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.6
 	github.com/aws/aws-sdk-go-v2/config v1.29.18
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.31.1
+	github.com/fogfish/it/v2 v2.2.4
 	github.com/fogfish/opts v0.0.5
 	github.com/kshard/chatter v0.0.0-00010101000000-000000000000
 )

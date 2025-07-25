@@ -2,10 +2,10 @@ package llama
 
 import "github.com/kshard/chatter"
 
-func (decoder decoder) Decode(llama *reply) (*chatter.Reply, error) {
+func (decoder decoder) Decode(bag *reply) (*chatter.Reply, error) {
 	reply := new(chatter.Reply)
 
-	switch llama.StopReason {
+	switch bag.StopReason {
 	case "stop":
 		reply.Stage = chatter.LLM_RETURN
 	case "length":
@@ -14,11 +14,11 @@ func (decoder decoder) Decode(llama *reply) (*chatter.Reply, error) {
 		reply.Stage = chatter.LLM_ERROR
 	}
 
-	reply.Usage.InputTokens = llama.UsedPromptTokens
-	reply.Usage.ReplyTokens = llama.UsedTextTokens
+	reply.Usage.InputTokens = bag.UsedPromptTokens
+	reply.Usage.ReplyTokens = bag.UsedTextTokens
 
 	reply.Content = []chatter.Content{
-		chatter.Text(llama.Text),
+		chatter.Text(bag.Text),
 	}
 
 	return reply, nil

@@ -15,11 +15,8 @@ func factory() (provider.Encoder[*input], error) {
 	return codec, nil
 }
 
-func (codec *encoder) WithTemperature(temp float64)         {}
-func (codec *encoder) WithTopP(topP float64)                {}
-func (codec *encoder) WithMaxTokens(maxTokens int)          {}
-func (codec *encoder) WithStopSequences(sequences []string) {}
-func (codec *encoder) WithCommand(cmd chatter.Cmd)          {}
+func (codec *encoder) WithInferrer(inferrer provider.Inferrer) {}
+func (codec *encoder) WithCommand(cmd chatter.Cmd)             {}
 
 func (codec *encoder) AsStratum(stratum chatter.Stratum) error {
 	return nil

@@ -12,7 +12,7 @@ import (
 )
 
 //
-// Configuration options for the Bedrock service
+// Configuration options for Bedrock
 //
 
 type Option = opts.Option[Client]

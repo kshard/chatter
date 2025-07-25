@@ -1,8 +1,6 @@
 module github.com/kshard/chatter
 
-go 1.23
-
-toolchain go1.24.1
+go 1.23.0
 
 require (
 	github.com/fogfish/faults v0.3.2

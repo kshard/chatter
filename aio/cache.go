@@ -25,10 +25,13 @@ type Getter interface{ Get([]byte) ([]byte, error) }
 // Setter interface abstract storage
 type Putter interface{ Put([]byte, []byte) error }
 
+type Eraser interface{ Delete([]byte) error }
+
 // KeyVal interface
 type KeyVal interface {
 	Getter
 	Putter
+	Eraser
 }
 
 // Caching strategy for LLMs I/O
@@ -77,13 +80,13 @@ func (c *Cache) Prompt(ctx context.Context, prompt []chatter.Message, opts ...ch
 	}
 
 	if len(val) != 0 {
-		return decode(val)
-		// return &chatter.Reply{
-		// 	Stage: chatter.LLM_RETURN,
-		// 	Content: []chatter.Content{
-		// 		chatter.Text(string(val)),
-		// 	},
-		// }, nil
+		reply, err := decode(val)
+		if err == nil {
+			return reply, nil
+		}
+
+		slog.Warn("failed to decode cached LLM reply", "err", err)
+		c.cache.Delete(hkey)
 	}
 
 	reply, err := c.Chatter.Prompt(ctx, prompt, opts...)

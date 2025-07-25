@@ -1,6 +1,6 @@
 github.com/fogfish/faults v0.3.2 h1:kQai2/VyXJxfd6SD/jYLHiqu0qDl/KXT48q1ppLMAnY=
 github.com/fogfish/faults v0.3.2/go.mod h1:y8zvZN2pQUe9vDS7rzz0mAnbdfYMorPOeqxpy83YOCk=
-github.com/fogfish/it/v2 v2.2.1 h1:NuuaENAZka8XiJkEj2Q6THRsHSwleC/BLDux82NvkII=
-github.com/fogfish/it/v2 v2.2.1/go.mod h1:HHwufnTaZTvlRVnSesPl49HzzlMrQtweKbf+8Co/ll4=
+github.com/fogfish/it/v2 v2.2.4 h1:hkBePGW7X/wDc1QCLG/j+/j47TG4obnozYsGMX51yMQ=
+github.com/fogfish/it/v2 v2.2.4/go.mod h1:HHwufnTaZTvlRVnSesPl49HzzlMrQtweKbf+8Co/ll4=
 golang.org/x/time v0.11.0 h1:/bpjEDfN9tkoN/ryeYHnv5hcMlc8ncjMcM4XBk5NWV0=
 golang.org/x/time v0.11.0/go.mod h1:CDIdPxbZBQxdj6cxyCIdrNogrJKMJ7pr37NYpMcMDSg=

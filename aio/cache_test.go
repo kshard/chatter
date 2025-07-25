@@ -75,3 +75,8 @@ func (kv keyval) Put(key []byte, val []byte) error {
 	kv[string(key)] = val
 	return nil
 }
+
+func (kv keyval) Delete(key []byte) error {
+	delete(kv, string(key))
+	return nil
+}

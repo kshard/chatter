@@ -1,6 +1,8 @@
 module github.com/kshard/chatter/provider/openai
 
-go 1.24
+go 1.23.1
+
+toolchain go1.24.5
 
 replace github.com/kshard/chatter => ../../
 

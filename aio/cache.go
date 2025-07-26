@@ -9,8 +9,10 @@
 package aio
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha1"
+	"encoding/gob"
 	"fmt"
 	"log/slog"
 
@@ -23,10 +25,13 @@ type Getter interface{ Get([]byte) ([]byte, error) }
 // Setter interface abstract storage
 type Putter interface{ Put([]byte, []byte) error }
 
+type Eraser interface{ Delete([]byte) error }
+
 // KeyVal interface
 type KeyVal interface {
 	Getter
 	Putter
+	Eraser
 }
 
 // Caching strategy for LLMs I/O
@@ -37,13 +42,19 @@ type Cache struct {
 
 var _ chatter.Chatter = (*Cache)(nil)
 
+func init() {
+	gob.Register(chatter.Text(""))
+	gob.Register(chatter.Vector{})
+	gob.Register([]chatter.Content{})
+}
+
 // Creates read-through caching layer for LLM client.
 //
 // Use github.com/akrylysov/pogreb to cache chatter on local file systems:
 //
 //	llm, err := /* create LLM client */
 //	db, err := pogreb.Open("llm.cache", nil)
-//	text := cache.New(db, llm)
+//	text := aio.NewCache(db, llm)
 func NewCache(cache KeyVal, chatter chatter.Chatter) *Cache {
 	return &Cache{
 		Chatter: chatter,
@@ -69,12 +80,13 @@ func (c *Cache) Prompt(ctx context.Context, prompt []chatter.Message, opts ...ch
 	}
 
 	if len(val) != 0 {
-		return &chatter.Reply{
-			Stage: chatter.LLM_RETURN,
-			Content: []chatter.Content{
-				chatter.Text(string(val)),
-			},
-		}, nil
+		reply, err := decode(val)
+		if err == nil {
+			return reply, nil
+		}
+
+		slog.Warn("failed to decode cached LLM reply", "err", err)
+		c.cache.Delete(hkey)
 	}
 
 	reply, err := c.Chatter.Prompt(ctx, prompt, opts...)
@@ -82,12 +94,50 @@ func (c *Cache) Prompt(ctx context.Context, prompt []chatter.Message, opts ...ch
 		return nil, err
 	}
 
-	if reply != nil && reply.Stage == chatter.LLM_RETURN {
-		err = c.cache.Put(hkey, []byte(reply.String()))
-		if err != nil {
-			slog.Warn("failed to cache LLM reply", "err", err)
+	if reply.Stage == chatter.LLM_RETURN {
+		bin, err := encode(reply)
+		switch {
+		case err != nil:
+			slog.Warn("failed to encode LLM reply", "err", err)
+			return reply, nil
+		case bin == nil:
+			return reply, nil
+		default:
+			err = c.cache.Put(hkey, bin)
+			if err != nil {
+				slog.Warn("failed to cache LLM reply", "err", err)
+			}
+			return reply, nil
 		}
 	}
 
 	return reply, nil
+}
+
+func encode(reply *chatter.Reply) ([]byte, error) {
+	if reply == nil {
+		return nil, nil
+	}
+
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	if err := enc.Encode(&reply.Content); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+func decode(data []byte) (*chatter.Reply, error) {
+	dec := gob.NewDecoder(bytes.NewBuffer(data))
+
+	var val []chatter.Content
+	if err := dec.Decode(&val); err != nil {
+		return nil, err
+	}
+
+	return &chatter.Reply{
+		Stage:   chatter.LLM_RETURN,
+		Content: val,
+	}, nil
 }

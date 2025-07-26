@@ -14,7 +14,11 @@ import (
 	"strings"
 )
 
-// Message is an abstract LLM I/O element
+// Message is an element of the conversation with LLMs.
+// Sequence of messages forms a conversation, memory or history.
+//
+// Messages are composed from different [Content] blocks.
+// We distinguish between input messages (prompts) and output messages (replies).
 type Message interface {
 	fmt.Stringer
 	HKT1(Message)
@@ -46,7 +50,7 @@ type Reply struct {
 
 var _ Message = (*Reply)(nil)
 
-func (Reply) HKT1(Message) {}
+func (*Reply) HKT1(Message) {}
 
 func (reply Reply) String() string {
 	seq := make([]string, 0)
@@ -59,7 +63,7 @@ func (reply Reply) String() string {
 	return strings.Join(seq, "")
 }
 
-// Invoke external tools
+// Helper function to invoke external tools
 func (reply Reply) Invoke(f func(string, json.RawMessage) (json.RawMessage, error)) (Answer, error) {
 	if reply.Stage != LLM_INVOKE {
 		return Answer{}, nil
@@ -69,11 +73,11 @@ func (reply Reply) Invoke(f func(string, json.RawMessage) (json.RawMessage, erro
 	for _, inv := range reply.Content {
 		switch v := inv.(type) {
 		case Invoke:
-			val, err := f(v.Name, v.Args.Value)
+			val, err := f(v.Cmd, v.Args.Value)
 			if err != nil {
 				return answer, err
 			}
-			answer.Yield = append(answer.Yield, Json{ID: v.Args.ID, Source: v.Name, Value: val})
+			answer.Yield = append(answer.Yield, Json{ID: v.Args.ID, Source: v.Cmd, Value: val})
 		}
 	}
 
@@ -87,6 +91,6 @@ type Answer struct {
 
 var _ Message = (*Reply)(nil)
 
-func (Answer) HKT1(Message) {}
+func (*Answer) HKT1(Message) {}
 
 func (Answer) String() string { return "" }

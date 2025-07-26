@@ -170,44 +170,44 @@ func (prompt *Prompt) WithBlob(note string, text string) *Prompt {
 func (prompt *Prompt) ToSeq() []Message { return []Message{prompt} }
 
 // Converts prompt to structured string
-func (prompt *Prompt) String() string {
+func (prompt Prompt) String() string {
 	seq := make([]string, 0)
 
 	//	 {task}. {guidelines}.
 	if len(prompt.Task) > 0 {
 		seq = append(seq, prompt.Task.String())
 	}
-	for _, x := range filter[Guide](prompt) {
+	for _, x := range filter[Guide](&prompt) {
 		seq = append(seq, x.String())
 	}
 
 	//		1. {requirements}
 	//		2. ...
-	for _, x := range filter[Rules](prompt) {
+	for _, x := range filter[Rules](&prompt) {
 		seq = append(seq, x.String())
 	}
 
 	//	 {feedback}
-	for _, x := range filter[Feedback](prompt) {
+	for _, x := range filter[Feedback](&prompt) {
 		seq = append(seq, x.String())
 	}
 
 	//	 {examples}
-	for _, x := range filter[Example](prompt) {
+	for _, x := range filter[Example](&prompt) {
 		seq = append(seq, x.String())
 	}
 
 	//	 {context}
-	for _, x := range filter[Context](prompt) {
+	for _, x := range filter[Context](&prompt) {
 		seq = append(seq, x.String())
 	}
 
 	//	 ...
 	//	 {input}
-	for _, x := range filter[Input](prompt) {
+	for _, x := range filter[Input](&prompt) {
 		seq = append(seq, x.String())
 	}
-	for _, x := range filter[Blob](prompt) {
+	for _, x := range filter[Blob](&prompt) {
 		seq = append(seq, x.String())
 	}
 

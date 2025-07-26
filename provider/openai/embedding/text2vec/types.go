@@ -16,8 +16,9 @@ import (
 )
 
 type input struct {
-	Model string `json:"model"`
-	Text  string `json:"input"`
+	Model      string `json:"model"`
+	Text       string `json:"input"`
+	Dimensions int    `json:"dimensions,omitempty"`
 }
 
 type reply struct {
@@ -47,11 +48,11 @@ type decoder struct{}
 
 type Text = provider.Provider[*input, *reply]
 
-func New(model string, opts ...openai.Option) (*Text, error) {
+func New(model string, size int, opts ...openai.Option) (*Text, error) {
 	service, err := openai.New[*input, *reply]("/v1/embeddings", opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return provider.New(factory(model), decoder{}, service), nil
+	return provider.New(factory(model, size), decoder{}, service), nil
 }

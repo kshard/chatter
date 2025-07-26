@@ -15,12 +15,16 @@ import (
 	"github.com/kshard/chatter/aio/provider"
 )
 
-func factory() (provider.Encoder[*input], error) {
-	codec := &encoder{
-		w:   strings.Builder{},
-		req: input{},
+func factory(size int) func() (provider.Encoder[*input], error) {
+	return func() (provider.Encoder[*input], error) {
+		codec := &encoder{
+			w: strings.Builder{},
+			req: input{
+				Dimensions: size,
+			},
+		}
+		return codec, nil
 	}
-	return codec, nil
 }
 
 func (codec *encoder) WithInferrer(inferrer provider.Inferrer) {}

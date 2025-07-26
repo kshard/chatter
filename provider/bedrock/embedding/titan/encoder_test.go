@@ -18,19 +18,20 @@ import (
 )
 
 func TestEncoderTextInput(t *testing.T) {
-	f, err := factory()
+	f, err := factory(EMBEDDING_SIZE_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Hello world"))
 	it.Then(t).Must(it.Nil(err))
 
 	it.Then(t).Should(it.Json(f.Build()).Equiv(`{
-		"inputText": "Hello world"
+		"inputText": "Hello world",
+		"dimensions": 256
 	}`))
 }
 
 func TestEncoderPromptInput(t *testing.T) {
-	f, err := factory()
+	f, err := factory(EMBEDDING_SIZE_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	var prompt chatter.Prompt
@@ -41,12 +42,13 @@ func TestEncoderPromptInput(t *testing.T) {
 	it.Then(t).Must(it.Nil(err))
 
 	it.Then(t).Should(it.Json(f.Build()).Equiv(`{
-		"inputText": "regex:Summarize the following text.\nText to summarize:\n- The quick brown fox jumps over the lazy dog."
+		"inputText": "regex:Summarize the following text.\nText to summarize:\n- The quick brown fox jumps over the lazy dog.",
+		"dimensions": 256
 	}`))
 }
 
 func TestEncoderMultipleTextInputs(t *testing.T) {
-	f, err := factory()
+	f, err := factory(EMBEDDING_SIZE_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("First part "))
@@ -59,12 +61,13 @@ func TestEncoderMultipleTextInputs(t *testing.T) {
 	it.Then(t).Must(it.Nil(err))
 
 	it.Then(t).Should(it.Json(f.Build()).Equiv(`{
-		"inputText": "First part second part third part"
+		"inputText": "First part second part third part",
+		"dimensions": 256
 	}`))
 }
 
 func TestEncoderNoOpMethods(t *testing.T) {
-	f, err := factory()
+	f, err := factory(EMBEDDING_SIZE_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Test that no-op methods don't affect the output
@@ -111,17 +114,18 @@ func TestEncoderNoOpMethods(t *testing.T) {
 }
 
 func TestEncoderEmptyInput(t *testing.T) {
-	f, err := factory()
+	f, err := factory(EMBEDDING_SIZE_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Don't add any content, just build
 	it.Then(t).Should(it.Json(f.Build()).Equiv(`{
-		"inputText": ""
+		"inputText": "",
+		"dimensions": 256
 	}`))
 }
 
 func TestEncoderSpecialCharacters(t *testing.T) {
-	f, err := factory()
+	f, err := factory(EMBEDDING_SIZE_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Text with \"quotes\" and \n newlines \t tabs"))

@@ -18,7 +18,7 @@ import (
 )
 
 func TestEncoderBasicTextInput(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Hello world"))
@@ -26,12 +26,13 @@ func TestEncoderBasicTextInput(t *testing.T) {
 
 	it.Then(t).Should(it.Json(f.Build()).Equiv(`{
 		"model": "text-embedding-3-small",
-		"input": "Hello world"
+		"input": "Hello world",
+		"dimensions": 1024
 	}`))
 }
 
 func TestEncoderPromptInput(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	var prompt chatter.Prompt
@@ -43,12 +44,13 @@ func TestEncoderPromptInput(t *testing.T) {
 
 	it.Then(t).Should(it.Json(f.Build()).Equiv(`{
 		"model": "text-embedding-3-small",
-		"input": "regex:Summarize the following text\\.\\nText to summarize:\\n- The quick brown fox jumps over the lazy dog\\."
+		"input": "regex:Summarize the following text\\.\\nText to summarize:\\n- The quick brown fox jumps over the lazy dog\\.",
+		"dimensions": 1024
 	}`))
 }
 
 func TestEncoderComplexPromptWithAllContentTypes(t *testing.T) {
-	f, err := factory("text-embedding-3-large")()
+	f, err := factory("text-embedding-3-large", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	var prompt chatter.Prompt
@@ -76,7 +78,7 @@ func TestEncoderComplexPromptWithAllContentTypes(t *testing.T) {
 }
 
 func TestEncoderMultipleTextInputsConcatenation(t *testing.T) {
-	f, err := factory("text-embedding-ada-002")()
+	f, err := factory("text-embedding-ada-002", 0)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("First part "))
@@ -95,7 +97,7 @@ func TestEncoderMultipleTextInputsConcatenation(t *testing.T) {
 }
 
 func TestEncoderMixedContentTypes(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Initial text. "))
@@ -118,7 +120,7 @@ func TestEncoderMixedContentTypes(t *testing.T) {
 }
 
 func TestEncoderNoOpMethodsValidation(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Test that no-op methods don't affect the output
@@ -175,7 +177,7 @@ func TestEncoderNoOpMethodsValidation(t *testing.T) {
 }
 
 func TestEncoderEmptyInput(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Don't add any content, just build
@@ -186,7 +188,7 @@ func TestEncoderEmptyInput(t *testing.T) {
 }
 
 func TestEncoderSpecialCharactersAndEscaping(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Text with \"quotes\" and \n newlines \t tabs & special chars"))
@@ -199,7 +201,7 @@ func TestEncoderSpecialCharactersAndEscaping(t *testing.T) {
 }
 
 func TestEncoderUnicodeAndMultilingual(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Hello 世界 🌍 Привет мир مرحبا بالعالم"))
@@ -212,7 +214,7 @@ func TestEncoderUnicodeAndMultilingual(t *testing.T) {
 }
 
 func TestEncoderLongTextInput(t *testing.T) {
-	f, err := factory("text-embedding-3-large")()
+	f, err := factory("text-embedding-3-large", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	longText := `This is a very long text input that simulates real-world usage scenarios where users might want to embed large documents or extensive content. The purpose is to ensure that the encoder can handle substantial amounts of text without issues. This text contains multiple sentences, various punctuation marks, and represents the kind of content that might be processed in production environments.`
@@ -236,7 +238,7 @@ func TestEncoderDifferentModelTypes(t *testing.T) {
 
 	for _, model := range models {
 		t.Run("model_"+model, func(t *testing.T) {
-			f, err := factory(model)()
+			f, err := factory(model, 0)()
 			it.Then(t).Must(it.Nil(err))
 
 			err = f.AsText(chatter.Text("Test content for " + model))
@@ -252,7 +254,7 @@ func TestEncoderDifferentModelTypes(t *testing.T) {
 }
 
 func TestEncoderBuildIdempotency(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Consistent content"))
@@ -274,7 +276,7 @@ func TestEncoderBuildIdempotency(t *testing.T) {
 }
 
 func TestEncoderSequentialOperations(t *testing.T) {
-	f, err := factory("text-embedding-3-small")()
+	f, err := factory("text-embedding-3-small", 1024)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Test that content accumulates properly
@@ -297,7 +299,7 @@ func TestEncoderSequentialOperations(t *testing.T) {
 
 func TestEncoderEdgeCases(t *testing.T) {
 	t.Run("empty_string_text", func(t *testing.T) {
-		f, err := factory("text-embedding-3-small")()
+		f, err := factory("text-embedding-3-small", 1024)()
 		it.Then(t).Must(it.Nil(err))
 
 		err = f.AsText(chatter.Text(""))
@@ -310,7 +312,7 @@ func TestEncoderEdgeCases(t *testing.T) {
 	})
 
 	t.Run("whitespace_only_text", func(t *testing.T) {
-		f, err := factory("text-embedding-3-small")()
+		f, err := factory("text-embedding-3-small", 1024)()
 		it.Then(t).Must(it.Nil(err))
 
 		err = f.AsText(chatter.Text("   \n\t  "))
@@ -323,7 +325,7 @@ func TestEncoderEdgeCases(t *testing.T) {
 	})
 
 	t.Run("empty_model_name", func(t *testing.T) {
-		f, err := factory("")()
+		f, err := factory("", 0)()
 		it.Then(t).Must(it.Nil(err))
 
 		err = f.AsText(chatter.Text("Test content"))

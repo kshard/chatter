@@ -349,6 +349,10 @@ cd chatter
 go test ./...
 ```
 
+### API documentation
+* [AWS Bedrock API Params & Models](https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html)
+* [AWS Bedrock Foundation Models](https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html)
+
 ### commit message
 
 The commit message helps us to write a good release note, speed-up review process. The message should address two question what changed and why. The project follows the template defined by chapter [Contributing to a Project](http://git-scm.com/book/ch5-2.html) of Git book.

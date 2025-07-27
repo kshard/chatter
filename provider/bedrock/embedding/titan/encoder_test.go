@@ -18,7 +18,7 @@ import (
 )
 
 func TestEncoderTextInput(t *testing.T) {
-	f, err := factory(EMBEDDING_SIZE_256)()
+	f, err := factory(EMBEDDING_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Hello world"))
@@ -31,7 +31,7 @@ func TestEncoderTextInput(t *testing.T) {
 }
 
 func TestEncoderPromptInput(t *testing.T) {
-	f, err := factory(EMBEDDING_SIZE_256)()
+	f, err := factory(EMBEDDING_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	var prompt chatter.Prompt
@@ -48,7 +48,7 @@ func TestEncoderPromptInput(t *testing.T) {
 }
 
 func TestEncoderMultipleTextInputs(t *testing.T) {
-	f, err := factory(EMBEDDING_SIZE_256)()
+	f, err := factory(EMBEDDING_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("First part "))
@@ -67,7 +67,7 @@ func TestEncoderMultipleTextInputs(t *testing.T) {
 }
 
 func TestEncoderNoOpMethods(t *testing.T) {
-	f, err := factory(EMBEDDING_SIZE_256)()
+	f, err := factory(EMBEDDING_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Test that no-op methods don't affect the output
@@ -114,7 +114,7 @@ func TestEncoderNoOpMethods(t *testing.T) {
 }
 
 func TestEncoderEmptyInput(t *testing.T) {
-	f, err := factory(EMBEDDING_SIZE_256)()
+	f, err := factory(EMBEDDING_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	// Don't add any content, just build
@@ -125,7 +125,7 @@ func TestEncoderEmptyInput(t *testing.T) {
 }
 
 func TestEncoderSpecialCharacters(t *testing.T) {
-	f, err := factory(EMBEDDING_SIZE_256)()
+	f, err := factory(EMBEDDING_256)()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsText(chatter.Text("Text with \"quotes\" and \n newlines \t tabs"))

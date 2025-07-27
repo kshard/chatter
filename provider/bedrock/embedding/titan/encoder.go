@@ -15,12 +15,12 @@ import (
 	"github.com/kshard/chatter/aio/provider"
 )
 
-func factory(size int) func() (provider.Encoder[*input], error) {
+func factory(dimensions int) func() (provider.Encoder[*input], error) {
 	return func() (provider.Encoder[*input], error) {
 		codec := &encoder{
 			w: strings.Builder{},
 			req: input{
-				Dimensions: size,
+				Dimensions: dimensions,
 			},
 		}
 		return codec, nil

@@ -151,15 +151,32 @@ The library is organized into multiple submodules for better dependency control 
 
 Core data types are defined in the root module: `github.com/kshard/chatter`. This module defines how prompts are structured and how results are passed back to the application.
 
-All LLM adapters are implemented in provider-specific submodules under `github.com/kshard/chatter/{provider}`. See [provider](./provider/) folder for the list of supported backends. Each provider typically implements the generative AI services:
-* `embeddings` — vector embedding service
-* `llm` — interface for chat and completion models
+All LLM adapters are following the structure:
+```go
+import "github.com/kshard/chatter/{provider}/{capability}/{family}"
+```
 
-In addition to model adapters, the library includes composable utilities (in `github.com/kshard/chatter/aio`) for common tasks like caching, rate limiting, and more - helping to build efficient and scalable AI applications.
+For a list of supported `provider`, see the [provider](./provider/) folder.
+
+Each provider module encapsulates access to various **capabilities** — distinct categories of AI services such as:
+* `embedding` — vector embedding service, which transforms text into numerical representations for search, clustering, or similarity tasks.
+* `foundation` — interface for general-purpose large language model capabilities, including chat and text completion.
+
+Within each capability, implementations are further organized by **model families**, which group related models API characteristics. 
+
+Thus, the overall module hierarchy reflects this layered design:
+
+```
+provider/           # AI service provider (e.g., openai, mistral)
+  ├─ capability/    # Service category (e.g., embedding, llm)
+  │    └─ family/   # Model family (e.g., gpt, claude, text2vec)
+```
 
 For example:
 * `github.com/kshard/chatter/bedrock/llm/converse` implements [AWS Bedrock Converse API](https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html) 
 * `github.com/kshard/chatter/openai/llm/gpt` implements [OpenAI Chat Completition](https://platform.openai.com/docs/api-reference/chat) for GPT models
+
+In addition to model adapters, the library includes composable utilities (in `github.com/kshard/chatter/aio`) for common tasks like caching, rate limiting, and more - helping to build efficient and scalable AI applications.
 
 
 ### LLM I/O
@@ -245,6 +262,45 @@ TBD.
 
 
 ## Advanced Usage
+
+
+### Autoconfig: Model Initialization from External Configuration
+
+This library includes an `autoconfig` provider that offers a simple interface for creating models from external configuration. It is particularly useful when developing command-line applications or scripts where hardcoding model details is undesirable.
+
+By default, `autoconfig` reads configuration from your `~/.netrc` file, allowing you to specify the provider, model, and any provider- or model-specific options in a centralized, reusable way.
+
+```go
+import (
+	"github.com/kshard/chatter/provider/autoconfig"
+)
+
+model, err := autoconfig.FromNetRC("myservice")
+```
+
+#### `.netrc` Format
+
+Your `~/.netrc` file must include at least the `provider` and `model` fields under a named service entry. For example:
+
+```
+machine myservice
+  provider provider:bedrock/foundation/converse
+  model us.anthropic.claude-3-7-sonnet-20250219-v1:0
+```
+
+* `provider` specifies the full path to the provider's capability (e.g., `provider:bedrock/foundation/converse`). The path ressembles import path of providers implemented by this library
+* `model` specifies the exact model name as recognized by the provider
+
+
+Each provider and model family may support additional options. These can also be added under the same `machine` entry and will be passed into the corresponding provider implementation.
+
+```
+region     // used by Bedrock providers
+host       // used by OpenAI providers
+secret     // used by OpenAI providers
+timeout    // used by OpenAI providers
+dimensions // used by embedding families
+```
 
 ### LM Studio
 

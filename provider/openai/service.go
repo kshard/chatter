@@ -32,7 +32,7 @@ var (
 	WithHTTP = opts.Use[Client](http.NewStack)
 
 	// Config the host, api.openai.com is default
-	WithHost = opts.ForType[Client, ø.Authority]()
+	WithHost = opts.ForName[Client, string]("host")
 
 	// Config API secret key
 	WithSecret = opts.ForName[Client, string]("secret")
@@ -67,8 +67,8 @@ func withNetRC(h *Client, host string) error {
 
 type Client struct {
 	http.Stack
-	host   ø.Authority
-	path   ø.Path
+	host   string
+	path   string
 	secret string
 }
 
@@ -76,9 +76,9 @@ type Service[A, B any] struct {
 	client Client
 }
 
-func New[A, B any](path ø.Path, opt ...Option) (*Service[A, B], error) {
+func New[A, B any](path string, opt ...Option) (*Service[A, B], error) {
 	c := Client{
-		host: ø.Authority("https://api.openai.com"),
+		host: "https://api.openai.com",
 		path: path,
 	}
 	if err := opts.Apply(&c, opt); err != nil {
@@ -95,7 +95,7 @@ func New[A, B any](path ø.Path, opt ...Option) (*Service[A, B], error) {
 func (s *Service[A, B]) Invoke(ctx context.Context, input A) (B, error) {
 	bag, err := http.IO[B](s.client.WithContext(ctx),
 		http.POST(
-			ø.URI("%s%s", s.client.host, s.client.path),
+			ø.URI("%s%s", ø.Authority(s.client.host), ø.Path(s.client.path)),
 			ø.Accept.JSON,
 			ø.Authorization.Set("Bearer "+s.client.secret),
 			ø.ContentType.JSON,

@@ -33,18 +33,18 @@ type encoder struct {
 type decoder struct{}
 
 const (
-	EMBEDDING_SIZE_256  = 256
-	EMBEDDING_SIZE_512  = 512
-	EMBEDDING_SIZE_1024 = 1024
+	EMBEDDING_256  = 256
+	EMBEDDING_512  = 512
+	EMBEDDING_1024 = 1024
 )
 
 type Titan = provider.Provider[*input, *reply]
 
-func New(model string, size int, opts ...bedrock.Option) (*Titan, error) {
+func New(model string, dimensions int, opts ...bedrock.Option) (*Titan, error) {
 	service, err := bedrock.New[*input, *reply](model, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	return provider.New(factory(size), decoder{}, service), nil
+	return provider.New(factory(dimensions), decoder{}, service), nil
 }

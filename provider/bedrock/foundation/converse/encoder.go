@@ -43,11 +43,22 @@ func factory(model string, registry chatter.Registry) func() (provider.Encoder[*
 	}
 }
 
-func (codec *encoder) WithInferrer(inferrer provider.Inferrer) {
-	codec.req.InferenceConfig.Temperature = aws.Float32(float32(inferrer.Temperature))
-	codec.req.InferenceConfig.TopP = aws.Float32(float32(inferrer.TopP))
-	codec.req.InferenceConfig.MaxTokens = aws.Int32(int32(inferrer.MaxTokens))
-	codec.req.InferenceConfig.StopSequences = inferrer.StopSequences
+func (codec *encoder) WithInferrer(inf provider.Inferrer) {
+	if inf.Temperature > 0.0 && inf.Temperature <= 1.0 {
+		codec.req.InferenceConfig.Temperature = aws.Float32(float32(inf.Temperature))
+	}
+
+	if inf.TopP > 0.0 && inf.TopP <= 1.0 {
+		codec.req.InferenceConfig.TopP = aws.Float32(float32(inf.TopP))
+	}
+
+	if inf.MaxTokens > 0 {
+		codec.req.InferenceConfig.MaxTokens = aws.Int32(int32(inf.MaxTokens))
+	}
+
+	if inf.StopSequences != nil {
+		codec.req.InferenceConfig.StopSequences = inf.StopSequences
+	}
 }
 
 func (codec *encoder) WithCommand(cmd chatter.Cmd) {

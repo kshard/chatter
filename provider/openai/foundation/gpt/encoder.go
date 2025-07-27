@@ -23,10 +23,16 @@ func factory(model string) func() (provider.Encoder[*input], error) {
 	}
 }
 
-func (codec *encoder) WithInferrer(inferrer provider.Inferrer) {
-	codec.req.Temperature = inferrer.Temperature
-	codec.req.TopP = inferrer.TopP
-	codec.req.MaxTokens = inferrer.MaxTokens
+func (codec *encoder) WithInferrer(inf provider.Inferrer) {
+	if inf.Temperature > 0.0 && inf.Temperature <= 1.0 {
+		codec.req.Temperature = inf.Temperature
+	}
+	if inf.TopP > 0.0 && inf.TopP <= 1.0 {
+		codec.req.TopP = inf.TopP
+	}
+	if inf.MaxTokens > 0 {
+		codec.req.MaxTokens = inf.MaxTokens
+	}
 }
 
 func (codec *encoder) WithCommand(cmd chatter.Cmd) {

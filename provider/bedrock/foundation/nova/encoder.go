@@ -38,12 +38,22 @@ func (codec *encoder) WithStopSequences(sequences []string) {
 	codec.req.InferenceConfig.StopSequences = sequences
 }
 
-func (codec *encoder) WithInferrer(inferrer provider.Inferrer) {
-	codec.req.InferenceConfig.Temperature = inferrer.Temperature
-	codec.req.InferenceConfig.TopP = inferrer.TopP
-	codec.req.InferenceConfig.TopK = int(inferrer.TopK)
-	codec.req.InferenceConfig.MaxTokens = inferrer.MaxTokens
-	codec.req.InferenceConfig.StopSequences = inferrer.StopSequences
+func (codec *encoder) WithInferrer(inf provider.Inferrer) {
+	if inf.Temperature > 0.0 && inf.Temperature <= 1.0 {
+		codec.req.InferenceConfig.Temperature = inf.Temperature
+	}
+	if inf.TopP > 0.0 && inf.TopP <= 1.0 {
+		codec.req.InferenceConfig.TopP = inf.TopP
+	}
+	if inf.TopK > 0 {
+		codec.req.InferenceConfig.TopK = int(inf.TopK)
+	}
+	if inf.MaxTokens > 0 {
+		codec.req.InferenceConfig.MaxTokens = inf.MaxTokens
+	}
+	if inf.StopSequences != nil {
+		codec.req.InferenceConfig.StopSequences = inf.StopSequences
+	}
 }
 
 func (codec *encoder) WithCommand(cmd chatter.Cmd) {

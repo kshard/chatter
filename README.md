@@ -32,19 +32,19 @@
       <img src="https://img.shields.io/badge/doc-chatter-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>
-      chatter types
+      Core types and helper utilities
     </td></tr>
-    <!-- Module bedrock -->
+    <!-- Provider bedrock -->
     <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llm/bedrock/*"/>
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=provider/bedrock/*"/>
     </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llm/bedrock">
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/provider/bedrock">
       <img src="https://img.shields.io/badge/doc-bedrock-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>
-      AWS Bedrock LLMs
+      AWS Bedrock AI models
     </td></tr>
-    <!-- Module bedrock batch -->
+    <!-- Module bedrock batch 
     <tr><td><a href=".">
       <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llm/bedrockbatch/*"/>
     </a></td>
@@ -54,15 +54,16 @@
     <td>
       AWS Bedrock Batch Inference
     </td></tr>
-		<!-- Module openai -->
+    -->
+		<!-- Provider openai -->
     <tr><td><a href=".">
-      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=llm/openai/*"/>
+      <img src="https://img.shields.io/github/v/tag/kshard/chatter?label=version&filter=provider/openai/*"/>
     </a></td>
-    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/llm/openai">
+    <td><a href="https://pkg.go.dev/github.com/kshard/chatter/provider/openai">
       <img src="https://img.shields.io/badge/doc-openai-007d9c?logo=go&logoColor=white&style=platic" />
     </a></td>
     <td>
-      OpenAI and compatible LLMs
+      OpenAI models (+ compatible API)
     </td></tr>
 		</tbody>
 	</table>

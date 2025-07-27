@@ -11,15 +11,16 @@ package nova
 import (
 	"github.com/kshard/chatter/aio/provider"
 	"github.com/kshard/chatter/provider/bedrock"
+	"github.com/kshard/chatter/provider/bedrock/batch"
 )
 
 // Nova I/O Schema:
 // https://docs.aws.amazon.com/nova/latest/userguide/complete-request-schema.html
 
 type input struct {
-	System          []content       `json:"system,omitempty"`
-	Messages        []message       `json:"messages"`
-	InferenceConfig inferenceConfig `json:"inferenceConfig,omitempty"`
+	System          []content        `json:"system,omitempty"`
+	Messages        []message        `json:"messages"`
+	InferenceConfig *inferenceConfig `json:"inferenceConfig,omitempty"`
 
 	// Note: tools are not enabled use Converse API for this purpose
 }
@@ -76,4 +77,10 @@ func New(model string, opts ...bedrock.Option) (*Nova, error) {
 	}
 
 	return provider.New(factory, decoder{}, service), nil
+}
+
+type NovaBatch = batch.Provider[*input, *reply]
+
+func NewBatch(fs *batch.FileSystem, model string, opts ...batch.Option) (*NovaBatch, error) {
+	return batch.New(fs, model, factory, decoder{}, opts...)
 }

@@ -24,18 +24,33 @@ func factory() (provider.Encoder[*input], error) {
 
 func (codec *encoder) WithInferrer(inf provider.Inferrer) {
 	if inf.Temperature > 0.0 && inf.Temperature <= 1.0 {
+		if codec.req.InferenceConfig == nil {
+			codec.req.InferenceConfig = &inferenceConfig{}
+		}
 		codec.req.InferenceConfig.Temperature = inf.Temperature
 	}
 	if inf.TopP > 0.0 && inf.TopP <= 1.0 {
+		if codec.req.InferenceConfig == nil {
+			codec.req.InferenceConfig = &inferenceConfig{}
+		}
 		codec.req.InferenceConfig.TopP = inf.TopP
 	}
 	if inf.TopK > 0 {
+		if codec.req.InferenceConfig == nil {
+			codec.req.InferenceConfig = &inferenceConfig{}
+		}
 		codec.req.InferenceConfig.TopK = int(inf.TopK)
 	}
 	if inf.MaxTokens > 0 {
+		if codec.req.InferenceConfig == nil {
+			codec.req.InferenceConfig = &inferenceConfig{}
+		}
 		codec.req.InferenceConfig.MaxTokens = inf.MaxTokens
 	}
 	if inf.StopSequences != nil {
+		if codec.req.InferenceConfig == nil {
+			codec.req.InferenceConfig = &inferenceConfig{}
+		}
 		codec.req.InferenceConfig.StopSequences = inf.StopSequences
 	}
 }

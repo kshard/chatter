@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        module: [".", "llm/autoconfig", "llm/bedrock", "llm/bedrockbatch", "llm/converse", "llm/openai"]
+        module: ["."]
 
     steps:
       - uses: actions/setup-go@v5

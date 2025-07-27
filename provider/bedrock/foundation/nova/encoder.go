@@ -22,22 +22,6 @@ func factory() (provider.Encoder[*input], error) {
 	return codec, nil
 }
 
-func (codec *encoder) WithTemperature(temp float64) {
-	codec.req.InferenceConfig.Temperature = temp
-}
-
-func (codec *encoder) WithTopP(topP float64) {
-	codec.req.InferenceConfig.TopP = topP
-}
-
-func (codec *encoder) WithMaxTokens(maxTokens int) {
-	codec.req.InferenceConfig.MaxTokens = maxTokens
-}
-
-func (codec *encoder) WithStopSequences(sequences []string) {
-	codec.req.InferenceConfig.StopSequences = sequences
-}
-
 func (codec *encoder) WithInferrer(inf provider.Inferrer) {
 	if inf.Temperature > 0.0 && inf.Temperature <= 1.0 {
 		codec.req.InferenceConfig.Temperature = inf.Temperature

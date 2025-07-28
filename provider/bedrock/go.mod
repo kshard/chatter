@@ -2,8 +2,6 @@ module github.com/kshard/chatter/provider/bedrock
 
 go 1.23.0
 
-replace github.com/kshard/chatter => ../../
-
 require (
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.207.0
 	github.com/aws/aws-sdk-go-v2 v1.36.6
@@ -16,7 +14,7 @@ require (
 	github.com/fogfish/it/v2 v2.2.4
 	github.com/fogfish/opts v0.0.5
 	github.com/fogfish/stream v1.3.0
-	github.com/kshard/chatter v0.0.0-00010101000000-000000000000
+	github.com/kshard/chatter v0.10.0
 )
 
 require (

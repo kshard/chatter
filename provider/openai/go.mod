@@ -4,15 +4,13 @@ go 1.23.1
 
 toolchain go1.24.5
 
-replace github.com/kshard/chatter => ../../
-
 require (
 	github.com/fogfish/gurl/v2 v2.10.0
 	github.com/fogfish/it/v2 v2.2.4
 	github.com/fogfish/logger/x/xlog v0.0.1
 	github.com/fogfish/opts v0.0.5
 	github.com/jdxcode/netrc v1.0.0
-	github.com/kshard/chatter v0.0.0-00010101000000-000000000000
+	github.com/kshard/chatter v0.10.0
 )
 
 require (

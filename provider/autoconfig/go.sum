@@ -71,6 +71,12 @@ github.com/jdxcode/netrc v1.0.0/go.mod h1:Zi/ZFkEqFHTm7qkjyNJjaWH4LQA9LQhGJyF0lT
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/kshard/chatter v0.10.0 h1:fpeoUEdYHQSowaBl5AoPQE/+gEy5Bdi/er6FvxBu7YI=
+github.com/kshard/chatter v0.10.0/go.mod h1:Vt3iFouIVIZl4BPicS6JQgEG3ajDLGJwj+//noa93Cc=
+github.com/kshard/chatter/provider/bedrock v0.10.0 h1:UKaU+Wae4ulK25VjEDFZr+EJK58PEHvxLJaSfUyVtTA=
+github.com/kshard/chatter/provider/bedrock v0.10.0/go.mod h1:We8NnKAxP8oL7196PnXEFCwxvYblc+0r+BNI92Rmzmg=
+github.com/kshard/chatter/provider/openai v0.10.0 h1:bWd+sCg/VWAwBZ+zPhBHTg5MgAXIYL4K6o2MrrlU+EQ=
+github.com/kshard/chatter/provider/openai v0.10.0/go.mod h1:KaHKq1swi+B66iWAsEgnAFO3ooXOewV1vQizUBkzU7Q=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 golang.org/x/net v0.17.0 h1:pVaXccu2ozPjCXewfr1S7xza/zcXTity9cCdXQYSjIM=

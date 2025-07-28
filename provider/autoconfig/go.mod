@@ -4,20 +4,14 @@ go 1.23.1
 
 toolchain go1.24.5
 
-replace github.com/kshard/chatter => ../../
-
-replace github.com/kshard/chatter/provider/bedrock => ../bedrock
-
-replace github.com/kshard/chatter/provider/openai => ../openai
-
 require (
 	github.com/fogfish/curie/v2 v2.1.2
 	github.com/fogfish/gurl/v2 v2.10.0
 	github.com/fogfish/it/v2 v2.2.4
 	github.com/jdxcode/netrc v1.0.0
 	github.com/kshard/chatter v0.10.0
-	github.com/kshard/chatter/provider/bedrock v0.0.0-00010101000000-000000000000
-	github.com/kshard/chatter/provider/openai v0.0.0-00010101000000-000000000000
+	github.com/kshard/chatter/provider/bedrock v0.10.0
+	github.com/kshard/chatter/provider/openai v0.10.0
 )
 
 require (

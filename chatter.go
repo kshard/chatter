@@ -44,17 +44,21 @@ type TopP float64
 
 func (TopP) ChatterOpt() {}
 
+type TopK float64
+
+func (TopK) ChatterOpt() {}
+
 // Token quota for reply, the model would limit response given number
-type Quota int
+type MaxTokens int
 
-func (Quota) ChatterOpt() {}
+func (MaxTokens) ChatterOpt() {}
 
-// The stop sequence prevents LLMsfrom generating more text after a specific
+// The stop sequence prevents LLMs from generating more text after a specific
 // string appears. Stop sequences make it easy to guarantee concise,
 // controlled responses from models.
-type StopSequence string
+type StopSequences []string
 
-func (StopSequence) ChatterOpt() {}
+func (StopSequences) ChatterOpt() {}
 
 // Command registry is a sequence of tools available for LLM usage.
 type Registry []Cmd

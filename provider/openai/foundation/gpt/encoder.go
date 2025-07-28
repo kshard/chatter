@@ -1,0 +1,73 @@
+//
+// Copyright (C) 2024 - 2025 Dmitry Kolesnikov
+//
+// This file may be modified and distributed under the terms
+// of the MIT license.  See the LICENSE file for details.
+// https://github.com/kshard/chatter
+//
+
+package gpt
+
+import (
+	"github.com/kshard/chatter"
+	"github.com/kshard/chatter/aio/provider"
+)
+
+func factory(model string) func() (provider.Encoder[*input], error) {
+	return func() (provider.Encoder[*input], error) {
+		return &encoder{req: input{
+			Model:    model,
+			Messages: []message{},
+		},
+		}, nil
+	}
+}
+
+func (codec *encoder) WithInferrer(inf provider.Inferrer) {
+	if inf.Temperature > 0.0 && inf.Temperature <= 1.0 {
+		codec.req.Temperature = inf.Temperature
+	}
+	if inf.TopP > 0.0 && inf.TopP <= 1.0 {
+		codec.req.TopP = inf.TopP
+	}
+	if inf.MaxTokens > 0 {
+		codec.req.MaxTokens = inf.MaxTokens
+	}
+}
+
+func (codec *encoder) WithCommand(cmd chatter.Cmd) {
+	// Not supported yet by the library
+}
+
+func (codec *encoder) AsStratum(stratum chatter.Stratum) error {
+	msg := message{Role: "system", Content: string(stratum)}
+	codec.req.Messages = append(codec.req.Messages, msg)
+	return nil
+}
+
+func (codec *encoder) AsText(text chatter.Text) error {
+	msg := message{Role: "user", Content: string(text)}
+	codec.req.Messages = append(codec.req.Messages, msg)
+	return nil
+}
+
+func (codec *encoder) AsPrompt(prompt *chatter.Prompt) error {
+	msg := message{Role: "user", Content: prompt.String()}
+	codec.req.Messages = append(codec.req.Messages, msg)
+	return nil
+}
+
+func (codec *encoder) AsAnswer(answer *chatter.Answer) error {
+	// Not supported yet
+	return nil
+}
+
+func (codec *encoder) AsReply(reply *chatter.Reply) error {
+	msg := message{Role: "assistant", Content: reply.String()}
+	codec.req.Messages = append(codec.req.Messages, msg)
+	return nil
+}
+
+func (codec *encoder) Build() *input {
+	return &codec.req
+}

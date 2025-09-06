@@ -21,37 +21,26 @@ type Embedder struct {
 	chatter.Chatter
 }
 
-// Embedding vector
-type Embedding struct {
-	Text       string
-	Vector     []float32
-	UsedTokens int
-}
-
 func NewEmbedder(chatter chatter.Chatter) *Embedder {
 	return &Embedder{
 		Chatter: chatter,
 	}
 }
 
-func (api *Embedder) Embedding(ctx context.Context, text string) (*Embedding, error) {
+func (api *Embedder) Embedding(ctx context.Context, text string) ([]float32, int, error) {
 	reply, err := api.Chatter.Prompt(ctx,
 		[]chatter.Message{chatter.Text(text)},
 	)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	for _, content := range reply.Content {
 		switch c := content.(type) {
 		case chatter.Vector:
-			return &Embedding{
-				Text:       text,
-				Vector:     c,
-				UsedTokens: reply.Usage.InputTokens + reply.Usage.ReplyTokens,
-			}, nil
+			return c, reply.Usage.InputTokens + reply.Usage.ReplyTokens, nil
 		}
 	}
 
-	return nil, fmt.Errorf("invalid response, no vector found")
+	return nil, 0, fmt.Errorf("invalid response, no vector found")
 }

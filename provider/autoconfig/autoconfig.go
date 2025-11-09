@@ -123,19 +123,25 @@ var _ Config = netconfig{}
 
 // Configure LLM interface using ~/.netrc configuration
 func FromNetRC(host string, model ...string) (chatter.Chatter, error) {
+	return FromFile(".netrc", host, model...)
+}
+
+// Configure LLM interface using custom rc configuration file,
+// typically located at ~/.<file>, file is relative to home directory.
+func FromFile(file, host string, model ...string) (chatter.Chatter, error) {
 	usr, err := user.Current()
 	if err != nil {
 		return nil, err
 	}
 
-	n, err := netrc.Parse(filepath.Join(usr.HomeDir, ".netrc"))
+	n, err := netrc.Parse(filepath.Join(usr.HomeDir, file))
 	if err != nil {
 		return nil, err
 	}
 
 	machine := n.Machine(host)
 	if machine == nil {
-		return nil, fmt.Errorf("undefined config for <%s> at ~/.netrc", host)
+		return nil, fmt.Errorf("undefined config for <%s> at %s", host, file)
 	}
 
 	return New(netconfig{machine: machine}, model...)

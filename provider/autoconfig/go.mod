@@ -1,6 +1,6 @@
 module github.com/kshard/chatter/provider/autoconfig
 
-go 1.25.4
+go 1.24
 
 require (
 	github.com/fogfish/curie/v2 v2.1.2
@@ -9,7 +9,7 @@ require (
 	github.com/jdxcode/netrc v1.0.0
 	github.com/kshard/chatter v0.11.1
 	github.com/kshard/chatter/provider/bedrock v0.10.0
-	github.com/kshard/chatter/provider/google v0.1.0
+	github.com/kshard/chatter/provider/google v0.1.1
 	github.com/kshard/chatter/provider/openai v0.10.0
 )
 

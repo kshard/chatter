@@ -234,3 +234,14 @@ func (v Vector) MarshalJSON() ([]byte, error) {
 		Vector []float32 `json:"vector,omitempty"`
 	}{Vector: []float32(v)})
 }
+
+//------------------------------------------------------------------------------
+
+// Binary is a sequence of bytes representing binary data.
+type Binary struct {
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
+	Data []byte `json:"data,omitempty"`
+}
+
+func (b Binary) String() string { return fmt.Sprintf("%s (%s %d bytes)", b.Name, b.Type, len(b.Data)) }

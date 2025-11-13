@@ -1,20 +1,22 @@
 module github.com/kshard/chatter/provider/autoconfig
 
-go 1.23.1
-
-toolchain go1.24.5
+go 1.25.4
 
 require (
 	github.com/fogfish/curie/v2 v2.1.2
 	github.com/fogfish/gurl/v2 v2.10.0
 	github.com/fogfish/it/v2 v2.2.4
 	github.com/jdxcode/netrc v1.0.0
-	github.com/kshard/chatter v0.10.0
+	github.com/kshard/chatter v0.11.1
 	github.com/kshard/chatter/provider/bedrock v0.10.0
+	github.com/kshard/chatter/provider/google v0.1.0
 	github.com/kshard/chatter/provider/openai v0.10.0
 )
 
 require (
+	cloud.google.com/go v0.116.0 // indirect
+	cloud.google.com/go/auth v0.9.3 // indirect
+	cloud.google.com/go/compute/metadata v0.5.0 // indirect
 	github.com/ajg/form v1.5.2-0.20200323032839-9aeb3cf462e1 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.36.6 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.11 // indirect
@@ -45,6 +47,18 @@ require (
 	github.com/fogfish/logger/x/xlog v0.0.1 // indirect
 	github.com/fogfish/opts v0.0.5 // indirect
 	github.com/fogfish/stream v1.3.0 // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
+	github.com/google/s2a-go v0.1.8 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
+	go.opencensus.io v0.24.0 // indirect
+	golang.org/x/crypto v0.27.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/text v0.18.0 // indirect
+	google.golang.org/genai v1.34.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240903143218-8af14fe29dc1 // indirect
+	google.golang.org/grpc v1.66.2 // indirect
+	google.golang.org/protobuf v1.34.2 // indirect
 )

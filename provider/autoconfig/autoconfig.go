@@ -26,6 +26,8 @@ import (
 	"github.com/kshard/chatter/provider/bedrock/foundation/converse"
 	"github.com/kshard/chatter/provider/bedrock/foundation/llama"
 	"github.com/kshard/chatter/provider/bedrock/foundation/nova"
+	"github.com/kshard/chatter/provider/google/foundation/gemini"
+	"github.com/kshard/chatter/provider/google/foundation/imagen"
 	"github.com/kshard/chatter/provider/openai"
 	"github.com/kshard/chatter/provider/openai/embedding/text2vec"
 	"github.com/kshard/chatter/provider/openai/foundation/gpt"
@@ -96,6 +98,12 @@ func New(c Config, model ...string) (chatter.Chatter, error) {
 			openai.WithSecret(c.Get(opt_secret)),
 			openai.WithHTTP(http.WithClient(curl(c))),
 		)
+
+	case "provider:google/foundation/gemini":
+		return gemini.New(fmID, gemini.Config{Secret: c.Get(opt_secret)})
+
+	case "provider:google/foundation/imagen":
+		return imagen.New(fmID, imagen.Config{Secret: c.Get(opt_secret)})
 	}
 
 	return nil, fmt.Errorf("configuration is not supported: %s", c.Model())

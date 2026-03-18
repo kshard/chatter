@@ -8,4 +8,4 @@
 
 package google
 
-const Version = "provider/google/v0.1.1"
+const Version = "provider/google/v0.1.2"

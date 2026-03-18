@@ -1,9 +1,9 @@
 module github.com/kshard/chatter/provider/google
 
-go 1.24
+go 1.25.0
 
 require (
-	github.com/kshard/chatter v0.11.1
+	github.com/kshard/chatter v0.11.2
 	google.golang.org/genai v1.34.0
 )
 

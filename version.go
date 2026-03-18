@@ -8,4 +8,4 @@
 
 package chatter
 
-const Version = "v0.11.1"
+const Version = "v0.11.2"

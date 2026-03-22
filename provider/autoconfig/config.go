@@ -72,6 +72,33 @@ func (i Instances) Usage() (chatter.Usage, map[string]chatter.Usage) {
 	return total, usage
 }
 
+func (i Instances) String() string {
+	var sb strings.Builder
+
+	total, usage := i.Usage()
+
+	fmt.Fprintf(&sb, "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+	fmt.Fprintf(&sb, "Usage: %s (input: %s | output: %s)\n", fmtInt(total.InputTokens+total.ReplyTokens), fmtInt(total.InputTokens), fmtInt(total.ReplyTokens))
+	for name, llm := range usage {
+		input := llm.InputTokens
+		reply := llm.ReplyTokens
+		fmt.Fprintf(&sb, " - %s: %s (input: %s | output: %s)\n", name, fmtInt(input+reply), fmtInt(input), fmtInt(reply))
+	}
+	fmt.Fprintf(&sb, "\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n")
+
+	return sb.String()
+}
+
+func fmtInt(n int) string {
+	if n >= 1000000 {
+		return fmt.Sprintf("%.1fM", float64(n)/1000000)
+	}
+	if n >= 1000 {
+		return fmt.Sprintf("%.1fK", float64(n)/1000)
+	}
+	return fmt.Sprintf("%d", n)
+}
+
 // Configures from file on local file system, panic if the file is not found or the configuration is invalid.
 func FromConfig(path string) (*Instances, error) {
 	if strings.HasPrefix(path, "~") {

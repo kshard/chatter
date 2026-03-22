@@ -6,6 +6,7 @@ require (
 	github.com/fogfish/curie/v2 v2.1.3
 	github.com/fogfish/gurl/v2 v2.10.0
 	github.com/fogfish/it/v2 v2.2.4
+	github.com/goccy/go-yaml v1.19.2
 	github.com/jdxcode/netrc v1.0.0
 	github.com/kshard/chatter v0.11.2
 	github.com/kshard/chatter/provider/bedrock v0.10.1

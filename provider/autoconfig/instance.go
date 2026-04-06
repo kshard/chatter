@@ -31,6 +31,9 @@ import (
 
 // Instance of LLM provider configuration, used for automatic configuration of LLM instances.
 type Instance struct {
+	// Unique name for the instance, used for reference in the application.
+	Name string `json:"name" yaml:"name"`
+
 	// Provider's identity and the capability to be used for inference job.
 	// The identity path to github.com/kshard/chatter/provider submobile.
 	// It consists of three segments: provider, capability, and family.

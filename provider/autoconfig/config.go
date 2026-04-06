@@ -99,6 +99,27 @@ func fmtInt(n int) string {
 	return fmt.Sprintf("%d", n)
 }
 
+// Configure environment from single instance
+func From(spec Instance) (*Instances, error) {
+	cfg := Instances{Spec: make(map[string]Instance)}
+	cfg.Spec[spec.Name] = spec
+
+	if err := cfg.Build(); err != nil {
+		return nil, err
+	}
+
+	return &cfg, nil
+}
+
+func MustFrom(spec Instance) *Instances {
+	cfg, err := From(spec)
+	if err != nil {
+		panic(fmt.Sprintf("failed to load configuration from instance: %v", err))
+	}
+
+	return cfg
+}
+
 // Configures from file on local file system, panic if the file is not found or the configuration is invalid.
 func FromConfig(path string) (*Instances, error) {
 	if strings.HasPrefix(path, "~") {
@@ -249,6 +270,7 @@ func FromNetRC(r io.Reader) (*Instances, error) {
 		}
 
 		cfg.Spec[machine.Name] = Instance{
+			Name:       machine.Name,
 			Provider:   machine.Get("provider"),
 			Model:      machine.Get("model"),
 			Region:     machine.Get("region"),

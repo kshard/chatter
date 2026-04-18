@@ -8,4 +8,4 @@
 
 package autoconfig
 
-const Version = "provider/autoconfig/v0.13.1"
+const Version = "provider/autoconfig/v0.13.2"

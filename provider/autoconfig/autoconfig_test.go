@@ -281,3 +281,48 @@ func TestInstances_Usage(t *testing.T) {
 		)
 	})
 }
+
+// ---------------------------------------------------------------------------
+// MustMock
+
+func TestMustMock(t *testing.T) {
+	t.Run("returns_base_model_that_echoes_input_by_default", func(t *testing.T) {
+		instances := MustMock(nil)
+		llm, ok := instances.Model("base")
+
+		it.Then(t).Should(
+			it.Equal(ok, true),
+		).ShouldNot(
+			it.Nil(llm),
+		)
+
+		reply, err := llm.Prompt(context.Background(), []chatter.Message{chatter.Stratum("hello world")})
+		if err != nil {
+			t.Fatalf("prompt failed: %v", err)
+		}
+
+		it.Then(t).Should(
+			it.Equal(reply.String(), "hello world"),
+		)
+	})
+
+	t.Run("returns_base_model_with_configured_reply", func(t *testing.T) {
+		instances := MustMock("fixed reply")
+		llm, ok := instances.Model("base")
+
+		it.Then(t).Should(
+			it.Equal(ok, true),
+		).ShouldNot(
+			it.Nil(llm),
+		)
+
+		reply, err := llm.Prompt(context.Background(), []chatter.Message{chatter.Stratum("ignored input")})
+		if err != nil {
+			t.Fatalf("prompt failed: %v", err)
+		}
+
+		it.Then(t).Should(
+			it.Equal(reply.String(), "fixed reply"),
+		)
+	})
+}

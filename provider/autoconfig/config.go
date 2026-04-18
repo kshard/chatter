@@ -296,3 +296,18 @@ func MustFromNetRC(r io.Reader) *Instances {
 
 	return cfg
 }
+
+// Mock "base" llm for unit testing, it will echo the input by default, but can be configured to return a specific reply.
+func MustMock(v any) *Instances {
+	cfg := Instances{
+		Spec: make(map[string]Instance),
+		llms: make(map[string]chatter.Chatter),
+	}
+	cfg.Spec["base"] = Instance{
+		Name:     "base",
+		Provider: "provider:mock",
+	}
+	cfg.llms["base"] = NewMock(v)
+
+	return &cfg
+}

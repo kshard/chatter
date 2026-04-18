@@ -10,6 +10,8 @@ package autoconfig
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/kshard/chatter"
@@ -18,6 +20,11 @@ import (
 // Mock is a simple mock LLM that echoes the input.
 type Mock struct {
 	usage chatter.Usage
+	reply any
+}
+
+func NewMock(reply any) *Mock {
+	return &Mock{reply: reply}
 }
 
 func (m *Mock) Usage() chatter.Usage {
@@ -30,7 +37,21 @@ func (m *Mock) Prompt(ctx context.Context, prompt []chatter.Message, opt ...chat
 	for i, msg := range prompt {
 		seq[i] = msg.String()
 	}
-	reply := strings.Join(seq, " ")
+	var reply string
+	switch r := m.reply.(type) {
+	case nil:
+		reply = strings.Join(seq, " ")
+	case string:
+		reply = r
+	case fmt.Stringer:
+		reply = r.String()
+	default:
+		b, err := json.Marshal(m.reply)
+		if err != nil {
+			return nil, err
+		}
+		reply = string(b)
+	}
 
 	m.usage.InputTokens += len(reply)
 	m.usage.ReplyTokens += len(reply)

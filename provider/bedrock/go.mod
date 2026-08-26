@@ -4,9 +4,9 @@ go 1.25.0
 
 require (
 	github.com/aws/aws-cdk-go/awscdk/v2 v2.207.0
-	github.com/aws/aws-sdk-go-v2 v1.41.4
+	github.com/aws/aws-sdk-go-v2 v1.43.8
 	github.com/aws/aws-sdk-go-v2/config v1.32.12
-	github.com/aws/aws-sdk-go-v2/service/bedrock v1.39.1
+	github.com/aws/aws-sdk-go-v2/service/bedrock v1.67.1
 	github.com/aws/aws-sdk-go-v2/service/bedrockruntime v1.50.2
 	github.com/aws/constructs-go/constructs/v10 v10.4.2
 	github.com/aws/jsii-runtime-go v1.112.0
@@ -23,8 +23,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.19.12 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.20 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.70 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.20 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.20 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.39 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.39 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.6 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.7 // indirect
@@ -36,7 +36,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.30.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.41.9 // indirect
-	github.com/aws/smithy-go v1.24.2 // indirect
+	github.com/aws/smithy-go v1.27.10 // indirect
 	github.com/cdklabs/awscdk-asset-awscli-go/awscliv1/v2 v2.2.242 // indirect
 	github.com/cdklabs/awscdk-asset-node-proxy-agent-go/nodeproxyagentv6/v2 v2.1.0 // indirect
 	github.com/cdklabs/cloud-assembly-schema-go/awscdkcloudassemblyschema/v45 v45.2.0 // indirect

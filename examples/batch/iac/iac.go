@@ -43,8 +43,15 @@ func NewIacStack(scope constructs.Construct, id string, props *IacStackProps) aw
 		Encryption:        awss3.BucketEncryption_S3_MANAGED,
 	})
 
+	// Keep in sync with the model constant in ../batch.go: it's a
+	// cross-region inference profile, so the role needs bedrock:InvokeModel
+	// on both the profile and the underlying foundation model.
 	role := iam.NewBatchRole(stack, jsii.String("BatchRole"), &iam.BatchRoleProps{
 		BucketName: *bucket.BucketName(),
+		InferenceProfile: &iam.InferenceProfileAccess{
+			ProfileID: "us.anthropic.claude-haiku-4-5-20251001-v1:0",
+			ModelID:   "anthropic.claude-haiku-4-5-20251001-v1:0",
+		},
 	})
 
 	awscdk.NewCfnOutput(stack, jsii.String("BucketName"), &awscdk.CfnOutputProps{

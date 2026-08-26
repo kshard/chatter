@@ -6,7 +6,7 @@
 // https://github.com/kshard/chatter
 //
 
-package converse
+package batching
 
 import (
 	"encoding/json"
@@ -15,9 +15,9 @@ import (
 	"github.com/fogfish/it/v2"
 )
 
-func TestWireDecoderBasicTextResponse(t *testing.T) {
+func TestDecoderBasicTextResponse(t *testing.T) {
 	// https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html#API_runtime_Converse_Example_2
-	var out wireOutput
+	var out output
 	err := json.Unmarshal([]byte(`{
 		"output": {
 			"message": {
@@ -30,7 +30,7 @@ func TestWireDecoderBasicTextResponse(t *testing.T) {
 	}`), &out)
 	it.Then(t).Must(it.Nil(err))
 
-	reply, err := wireDecoder{}.Decode(&out)
+	reply, err := decoder{}.Decode(&out)
 	it.Then(t).Should(
 		it.Nil(err),
 		it.Json(reply).Equiv(`{
@@ -41,8 +41,8 @@ func TestWireDecoderBasicTextResponse(t *testing.T) {
 	)
 }
 
-func TestWireDecoderToolUseResponse(t *testing.T) {
-	var out wireOutput
+func TestDecoderToolUseResponse(t *testing.T) {
+	var out output
 	err := json.Unmarshal([]byte(`{
 		"output": {
 			"message": {
@@ -55,7 +55,7 @@ func TestWireDecoderToolUseResponse(t *testing.T) {
 	}`), &out)
 	it.Then(t).Must(it.Nil(err))
 
-	reply, err := wireDecoder{}.Decode(&out)
+	reply, err := decoder{}.Decode(&out)
 	it.Then(t).Should(
 		it.Nil(err),
 		it.Equal(reply.Stage, "invoke"),
@@ -63,7 +63,7 @@ func TestWireDecoderToolUseResponse(t *testing.T) {
 	)
 }
 
-func TestWireDecoderStageMapping(t *testing.T) {
+func TestDecoderStageMapping(t *testing.T) {
 	for reason, stage := range map[string]string{
 		"end_turn":         "return",
 		"max_tokens":       "incomplete",
@@ -71,7 +71,7 @@ func TestWireDecoderStageMapping(t *testing.T) {
 		"tool_use":         "invoke",
 		"content_filtered": "error",
 	} {
-		reply, err := wireDecoder{}.Decode(&wireOutput{StopReason: reason})
+		reply, err := decoder{}.Decode(&output{StopReason: reason})
 		it.Then(t).Should(
 			it.Nil(err),
 			it.Equal(string(reply.Stage), stage),

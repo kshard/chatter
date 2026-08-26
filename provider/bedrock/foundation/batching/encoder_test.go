@@ -6,7 +6,7 @@
 // https://github.com/kshard/chatter
 //
 
-package converse
+package batching
 
 import (
 	"encoding/json"
@@ -17,9 +17,9 @@ import (
 	"github.com/kshard/chatter/aio/provider"
 )
 
-func TestWireEncoderMatchesConverseWireSchema(t *testing.T) {
+func TestEncoderMatchesConverseWireSchema(t *testing.T) {
 	// https://docs.aws.amazon.com/bedrock/latest/APIReference/API_runtime_Converse.html#API_runtime_Converse_Example_1
-	f, err := wireFactory()
+	f, err := factory()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsStratum(chatter.Stratum("You are an economist with access to lots of data"))
@@ -44,8 +44,8 @@ func TestWireEncoderMatchesConverseWireSchema(t *testing.T) {
 	)
 }
 
-func TestWireEncoderToolConfig(t *testing.T) {
-	f, err := wireFactory()
+func TestEncoderToolConfig(t *testing.T) {
+	f, err := factory()
 	it.Then(t).Must(it.Nil(err))
 
 	f.WithCommand(chatter.Cmd{
@@ -56,15 +56,14 @@ func TestWireEncoderToolConfig(t *testing.T) {
 
 	req := f.Build()
 	it.Then(t).Should(
-		it.Nil(err),
 		it.Equal(len(req.ToolConfig.Tools), 1),
 		it.Equal(req.ToolConfig.Tools[0].ToolSpec.Name, "get_weather"),
 		it.True(req.ToolConfig.ToolChoice.Auto != nil),
 	)
 }
 
-func TestWireEncoderAnswerProducesToolResult(t *testing.T) {
-	f, err := wireFactory()
+func TestEncoderAnswerProducesToolResult(t *testing.T) {
+	f, err := factory()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsAnswer(&chatter.Answer{
@@ -86,8 +85,8 @@ func TestWireEncoderAnswerProducesToolResult(t *testing.T) {
 	)
 }
 
-func TestWireEncoderReplyProducesAssistantMessage(t *testing.T) {
-	f, err := wireFactory()
+func TestEncoderReplyProducesAssistantMessage(t *testing.T) {
+	f, err := factory()
 	it.Then(t).Must(it.Nil(err))
 
 	err = f.AsReply(&chatter.Reply{

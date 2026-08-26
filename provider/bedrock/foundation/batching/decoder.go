@@ -6,24 +6,24 @@
 // https://github.com/kshard/chatter
 //
 
-package converse
+package batching
 
 import "github.com/kshard/chatter"
 
-type wireDecoder struct{}
+type decoder struct{}
 
-func (wireDecoder) Decode(out *wireOutput) (*chatter.Reply, error) {
+func (decoder) Decode(out *output) (*chatter.Reply, error) {
 	reply := new(chatter.Reply)
-	reply.Stage = decodeWireStage(out.StopReason)
+	reply.Stage = decodeStage(out.StopReason)
 
 	if out.Output != nil {
-		content := make([]chatter.Content, 0, len(out.Output.Message.Content))
+		c := make([]chatter.Content, 0, len(out.Output.Message.Content))
 		for _, block := range out.Output.Message.Content {
-			if c := decodeWireContent(block); c != nil {
-				content = append(content, c)
+			if v := decodeContent(block); v != nil {
+				c = append(c, v)
 			}
 		}
-		reply.Content = content
+		reply.Content = c
 	}
 
 	reply.Usage.InputTokens = out.Usage.InputTokens
@@ -32,7 +32,7 @@ func (wireDecoder) Decode(out *wireOutput) (*chatter.Reply, error) {
 	return reply, nil
 }
 
-func decodeWireStage(reason string) chatter.Stage {
+func decodeStage(reason string) chatter.Stage {
 	switch reason {
 	case "end_turn":
 		return chatter.LLM_RETURN
@@ -45,7 +45,7 @@ func decodeWireStage(reason string) chatter.Stage {
 	}
 }
 
-func decodeWireContent(block wireContent) chatter.Content {
+func decodeContent(block content) chatter.Content {
 	switch {
 	case block.ToolUse != nil:
 		return chatter.Invoke{

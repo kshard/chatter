@@ -19,22 +19,30 @@ import (
 	"github.com/fogfish/stream"
 	"github.com/kshard/chatter"
 	"github.com/kshard/chatter/provider/bedrock/batch"
-	"github.com/kshard/chatter/provider/bedrock/foundation/nova"
+	"github.com/kshard/chatter/provider/bedrock/foundation/batching"
 )
 
-// Amazon Nova Lite only supports batch inference as a single-region model
-// in a handful of regions (notably not us-west-2, this library's default).
+// batching.New encodes records in Bedrock's Converse wire format
+// (modelInvocationType: Converse) rather than a model-specific InvokeModel
+// body, so any model Bedrock accepts through Converse works here by
+// changing only this ID.
+//
+// Claude Haiku 4.5 has no single-region batch support: it's only reachable
+// for batch through a cross-region inference profile, hence the "us."
+// prefix below rather than the bare model ID (which fails with
+// "Batch inference is not supported for the requested model"). Use "eu.",
+// "au.", or "jp." for those geographies instead.
 // See https://docs.aws.amazon.com/bedrock/latest/userguide/batch-inference-supported.html
-const model = "amazon.nova-lite-v1:0"
+const model = "us.anthropic.claude-haiku-4-5-20251001-v1:0"
 
 // Extracts keywords from each line of the input file using AWS Bedrock
 // Batch Inference: every line is enqueued as a separate record, the whole
 // batch is submitted as a single job, and results are correlated back to
 // the line that produced them once the job completes.
 //
-// The region must be one where Nova Lite supports batch inference
-// (e.g. us-east-1, me-central-1) and must match the region the S3 bucket
-// and IAM role from ../iac were deployed to.
+// The region must be one where the model supports batch inference and
+// must match the region the S3 bucket and IAM role from ../iac were
+// deployed to.
 //
 //	go run . <region> <s3-bucket> <batch-role-arn> <input-file>
 func main() {
@@ -49,7 +57,7 @@ func main() {
 		panic(err)
 	}
 
-	assistant, err := nova.NewBatch(fsys, model, batch.WithRegion(region))
+	assistant, err := batching.New(fsys, model, batch.WithRegion(region))
 	if err != nil {
 		panic(err)
 	}

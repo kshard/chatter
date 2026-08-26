@@ -54,12 +54,16 @@ func NewBatchRole(scope constructs.Construct, id *string, props *BatchRoleProps)
 					awscdk.Stack_Of(scope).FormatArn(
 						&awscdk.ArnComponents{
 							Service:  jsii.String("s3"),
+							Region:   jsii.String(""),
+							Account:  jsii.String(""),
 							Resource: jsii.String(props.BucketName),
 						},
 					),
 					awscdk.Stack_Of(scope).FormatArn(
 						&awscdk.ArnComponents{
 							Service:      jsii.String("s3"),
+							Region:       jsii.String(""),
+							Account:      jsii.String(""),
 							Resource:     jsii.String(props.BucketName),
 							ResourceName: jsii.String("*"),
 						},

@@ -46,6 +46,13 @@ var (
 
 	// Set AWS Bedrock Runtime
 	WithRuntime = opts.ForType[Client, Runtime]()
+
+	// Set the API format of the job's input/output records. Defaults to
+	// InvokeModel (model-specific request bodies). Set to
+	// types.ModelInvocationTypeConverse to use the Converse API format
+	// instead, which the factory/decoder passed to [New] must produce and
+	// consume respectively (see [github.com/kshard/chatter/provider/bedrock/foundation/converse.NewBatch]).
+	WithModelInvocationType = opts.ForType[Client, types.ModelInvocationType]()
 )
 
 func optsFromRegion(c *Client, region string) error {
@@ -76,9 +83,10 @@ type Runtime interface {
 }
 
 type Client struct {
-	api   Runtime
-	fs    *FileSystem
-	model string
+	api            Runtime
+	fs             *FileSystem
+	model          string
+	invocationType types.ModelInvocationType
 }
 
 type Provider[A, B any] struct {
@@ -148,8 +156,9 @@ func (p *Provider[A, B]) Prepare() (*Job[A, B], error) {
 				S3Uri: aws.String(reply),
 			},
 		},
-		ModelId: aws.String(p.client.model),
-		JobName: aws.String(u),
+		ModelId:             aws.String(p.client.model),
+		JobName:             aws.String(u),
+		ModelInvocationType: p.client.invocationType,
 	}
 
 	svc := &writer[A, B]{w: json.NewEncoder(fd)}

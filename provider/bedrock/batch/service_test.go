@@ -21,6 +21,8 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 	"github.com/aws/aws-sdk-go-v2/service/bedrock/types"
 	"github.com/fogfish/it/v2"
+	"github.com/fogfish/opts"
+	"github.com/fogfish/stream"
 	"github.com/kshard/chatter"
 	"github.com/kshard/chatter/aio/provider"
 )
@@ -39,7 +41,7 @@ type mockOutput struct {
 
 type mockEncoder struct{ req *mockInput }
 
-func (e *mockEncoder) WithInferrer(provider.Inferrer) {}
+func (e *mockEncoder) WithInferrer(provider.Inferrer)  {}
 func (e *mockEncoder) WithCommand(chatter.Cmd)         {}
 func (e *mockEncoder) AsStratum(chatter.Stratum) error { return nil }
 func (e *mockEncoder) AsText(t chatter.Text) error     { e.req.Text = string(t); return nil }
@@ -105,6 +107,15 @@ type memFile struct{ *bytes.Reader }
 
 func (f *memFile) Stat() (fs.FileInfo, error) { return nil, nil }
 func (f *memFile) Close() error               { return nil }
+
+// memCreateFS implements stream.CreateFS[struct{}] so Prepare can be
+// exercised without a real S3-backed FileSystem.
+type memCreateFS struct{}
+
+func (memCreateFS) Open(name string) (fs.File, error) { return nil, fs.ErrNotExist }
+func (memCreateFS) Create(path string, attr *struct{}) (stream.File, error) {
+	return &fakeFile{}, nil
+}
 
 //------------------------------------------------------------------------------
 // helpers
@@ -367,5 +378,37 @@ func TestWriter_InvokeEncodesRecordAndKeepsID(t *testing.T) {
 	it.Then(t).Should(
 		it.True(rec.ID != ""),
 		it.Equal(rec.ID, w.id),
+	)
+}
+
+//------------------------------------------------------------------------------
+// options
+//------------------------------------------------------------------------------
+
+func TestWithModelInvocationTypeSetsClientField(t *testing.T) {
+	c := Client{}
+	err := opts.Apply(&c, []Option{WithModelInvocationType(types.ModelInvocationTypeConverse)})
+
+	it.Then(t).Should(
+		it.Nil(err),
+		it.Equal(c.invocationType, types.ModelInvocationTypeConverse),
+	)
+}
+
+func TestPrepareSetsModelInvocationTypeOnJobSpec(t *testing.T) {
+	p := &Provider[*mockInput, *mockOutput]{
+		factory: mockFactory,
+		decoder: mockDecoder{},
+		client: Client{
+			fs:             &FileSystem{CreateFS: memCreateFS{}, bucket: "test-bucket"},
+			model:          "test-model",
+			invocationType: types.ModelInvocationTypeConverse,
+		},
+	}
+
+	job, err := p.Prepare()
+	it.Then(t).Should(
+		it.Nil(err),
+		it.Equal(job.spec.ModelInvocationType, types.ModelInvocationTypeConverse),
 	)
 }
